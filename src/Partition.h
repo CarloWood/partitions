@@ -32,6 +32,9 @@ class Partition
     return m_groups[group_index];
   }
 
+  auto gbegin() const { return m_groups.ibegin(); }
+  auto gend() const { return m_groups.iend(); }
+
   template<typename Algorithm>
   PartitionIterator begin() const;
 
@@ -49,6 +52,11 @@ class Partition
   void sort()
   {
     std::sort(m_groups.rbegin(), m_groups.rend());
+  }
+
+  void add_to(Group group, GroupIndex group_index)
+  {
+    m_groups[group_index].add(group);
   }
 
   friend bool operator<(Partition const& lhs, Partition const& rhs)

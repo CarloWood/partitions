@@ -8,7 +8,7 @@
 using utils::has_print_on::operator<<;
 
 using elements_t = utils::BitSet<uint16_t>;
-constexpr int number_of_elements = 5; //30;
+constexpr int number_of_elements = 8; //30;
 
 class Element;
 using ElementIndex = elements_t::Index;

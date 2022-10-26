@@ -3,8 +3,10 @@
 #include "PartitionIteratorBase.h"
 #include "PartitionIterator.h"
 #include "PartitionIteratorBruteForce.h"
+#include "Tree.h"
 #include "utils/MultiLoop.h"
-#include "debug.h"
+#include "utils/debug_ostream_operators.h"
+#include "utils/RandomNumber.h"
 #include <iostream>
 #include <iomanip>
 #include <cstdint>
@@ -12,6 +14,7 @@
 #include <chrono>
 #include <memory>
 #include <set>
+#include "debug.h"
 
 std::array<Score, 8> g_possible_scores = {
   negative_inf,
@@ -35,8 +38,8 @@ std::array<int, 8> frequency = {
   1
 };
 
-#if 0
 Element const A{'A'};
+#if 0
 Element const B{'B'};
 Element const C{'C'};
 Element const D{'D'};
@@ -56,15 +59,36 @@ Element const P{'P'};
 
 int main()
 {
+  Debug(NAMESPACE_DEBUG::init());
+  Dout(dc::notice, "Entering main()");
+
+  Tree root;
   int n = 0;
   for (auto bi = Partition::bbegin(); !bi.is_end(); ++bi)
   {
     Partition p = *bi;
+
+    Tree* current_tree = &root;
     std::cout << std::setw(4) << n << " : ";
-    p.print_groups();
+    char const* separator = "";
+    for (ElementIndex e = Element::ibegin(); e != Element::iend(); ++e)
+    {
+      for (GroupIndex g = p.gbegin(); g != p.gend(); ++g)
+      {
+        if (p.group(g).test(e))
+        {
+          std::cout << separator << Element{e} << "=" << g.get_value();
+          separator = ", ";
+          current_tree = current_tree->update(e, g);
+          break;
+        }
+      }
+    }
+
     std::cout << '\n';
     ++n;
   }
+  std::cout << root << '\n';
   return 0;
 
   int frequency_sum = 0;
@@ -83,18 +107,7 @@ int main()
     possible_scores_index_from_distribution.push_back(j);
   }
 
-  std::random_device rd;
-  std::mt19937::result_type seed = rd() ^ (
-          (std::mt19937::result_type)
-          std::chrono::duration_cast<std::chrono::seconds>(
-              std::chrono::system_clock::now().time_since_epoch()
-              ).count() +
-          (std::mt19937::result_type)
-          std::chrono::duration_cast<std::chrono::microseconds>(
-              std::chrono::high_resolution_clock::now().time_since_epoch()
-              ).count() );
-  std::cout << "seed = " << std::hex << seed << std::dec << std::endl;
-  std::mt19937 generator(seed);
+  utils::RandomNumber random_number;
   std::uniform_int_distribution<int> distribution(0, frequency_sum - 1);
 
   char const* sep = "    ";
@@ -112,7 +125,7 @@ int main()
       ElementPair ep(i1, i2);
       elements_t::mask_type score_index = ep.get_pair().to_ulong();
       if (g_scores[score_index].is_zero())
-        g_scores[score_index] = g_possible_scores[possible_scores_index_from_distribution[distribution(generator)]];
+        g_scores[score_index] = g_possible_scores[possible_scores_index_from_distribution[random_number.generate(distribution)]];
 
       std::cout << std::setw(5) << ep.score();
       //std::cout << ep << " : " << score(ep) << '\n';
