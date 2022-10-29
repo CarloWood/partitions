@@ -4,11 +4,13 @@
 #include "Element.h"
 #include "Group.h"
 #include "utils/Array.h"
+#include "utils/RandomNumber.h"
 #include <iosfwd>
 #include <algorithm>
 
 class PartitionIterator;
 class PartitionIteratorBruteForce;
+class PartitionIteratorScatter;
 
 class Partition
 {
@@ -20,7 +22,12 @@ class Partition
   Partition();
 
   template<ConceptGroup... GROUP>
-  Partition(GROUP... groups) : m_groups{groups...} { sort(); }
+  Partition(GROUP... groups) : m_groups{groups...}
+  {
+    for (GroupIndex gi{sizeof...(groups)}; gi != m_groups.iend(); ++gi)
+      m_groups[gi] = Group{elements_t{elements_t::mask_type{0}}};
+    sort();
+  }
 
   Partition(utils::Array<Group, number_of_elements, GroupIndex> const& groups) : m_groups(groups) { sort(); }
 
@@ -43,6 +50,12 @@ class Partition
   static PartitionIteratorBruteForce bbegin();
   static PartitionIteratorBruteForce bend();
 
+  PartitionIteratorScatter sbegin();
+  PartitionIteratorScatter send();
+
+  static utils::RandomNumber s_random_number;
+  static Partition random();
+
   GroupIndex number_of_groups() const;
   bool is_alone(Element element) const;
   GroupIndex group_of(Element element) const;
@@ -54,10 +67,17 @@ class Partition
     std::sort(m_groups.rbegin(), m_groups.rend());
   }
 
-  void add_to(Group group, GroupIndex group_index)
+  void add_to(GroupIndex group_index, Group group)
   {
     m_groups[group_index].add(group);
   }
+
+  void remove_from(GroupIndex group_index, Group group)
+  {
+    m_groups[group_index].remove(group);
+  }
+
+  Score find_local_maximum();
 
   friend bool operator<(Partition const& lhs, Partition const& rhs)
   {

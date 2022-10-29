@@ -1,9 +1,8 @@
 #include "sys.h"
 #include "ElementPair.h"
-#include "PartitionIteratorBase.h"
-#include "PartitionIterator.h"
-#include "PartitionIteratorBruteForce.h"
-#include "Tree.h"
+#include "Partition.h"
+#include "PartitionIteratorScatter.h"
+#include "GroupIteratorScatter.h"
 #include "utils/MultiLoop.h"
 #include "utils/debug_ostream_operators.h"
 #include "utils/RandomNumber.h"
@@ -14,6 +13,8 @@
 #include <chrono>
 #include <memory>
 #include <set>
+#include <map>
+#include <cmath>
 #include "debug.h"
 
 std::array<Score, 8> g_possible_scores = {
@@ -39,7 +40,6 @@ std::array<int, 8> frequency = {
 };
 
 Element const A{'A'};
-#if 0
 Element const B{'B'};
 Element const C{'C'};
 Element const D{'D'};
@@ -49,6 +49,7 @@ Element const G{'G'};
 Element const H{'H'};
 Element const I{'I'};
 Element const J{'J'};
+#if 0
 Element const K{'K'};
 Element const L{'L'};
 Element const M{'M'};
@@ -61,35 +62,6 @@ int main()
 {
   Debug(NAMESPACE_DEBUG::init());
   Dout(dc::notice, "Entering main()");
-
-  Tree root;
-  int n = 0;
-  for (auto bi = Partition::bbegin(); !bi.is_end(); ++bi)
-  {
-    Partition p = *bi;
-
-    Tree* current_tree = &root;
-    std::cout << std::setw(4) << n << " : ";
-    char const* separator = "";
-    for (ElementIndex e = Element::ibegin(); e != Element::iend(); ++e)
-    {
-      for (GroupIndex g = p.gbegin(); g != p.gend(); ++g)
-      {
-        if (p.group(g).test(e))
-        {
-          std::cout << separator << Element{e} << "=" << g.get_value();
-          separator = ", ";
-          current_tree = current_tree->update(e, g);
-          break;
-        }
-      }
-    }
-
-    std::cout << '\n';
-    ++n;
-  }
-  std::cout << root << '\n';
-  return 0;
 
   int frequency_sum = 0;
   for (int f : frequency)
@@ -107,7 +79,7 @@ int main()
     possible_scores_index_from_distribution.push_back(j);
   }
 
-  utils::RandomNumber random_number;
+  utils::RandomNumber random_number(0x5ebf860a924ad);
   std::uniform_int_distribution<int> distribution(0, frequency_sum - 1);
 
   char const* sep = "    ";
@@ -123,7 +95,7 @@ int main()
     for (ElementIndex i2 = i1 + 1; i2 != Element::iend(); ++i2)
     {
       ElementPair ep(i1, i2);
-      elements_t::mask_type score_index = ep.get_pair().to_ulong();
+      int score_index = ep.score_index();
       if (g_scores[score_index].is_zero())
         g_scores[score_index] = g_possible_scores[possible_scores_index_from_distribution[random_number.generate(distribution)]];
 
@@ -137,56 +109,33 @@ int main()
 
   Score max_score(negative_inf);
   std::map<Partition, int> results;
-  for (auto bi = Partition::bbegin(); !bi.is_end(); ++bi)
+  for (int rp = 0; rp < 1000; ++rp)
   {
-    Partition initial_partition = *bi;
-    Partition current_partition = initial_partition;
-    Score current_score = current_partition.score();
-    constexpr int number_of_algorithms = 2;
-    int no_improvement_count = 0;
-    do
+    Partition partition = Partition::random();
+    Score score = partition.find_local_maximum();
+    //std::cout << score << " : " << partition << '\n';
+    int count = 0;
+    for (PartitionIteratorScatter scatter = partition.sbegin(); !scatter.is_end(); ++scatter)
     {
-      for (int algorithm = 0; algorithm < number_of_algorithms; ++algorithm)
+      Partition partition2 = *scatter;
+      Score score2 = partition2.find_local_maximum();
+      if (score2 > score)
       {
-//        std::cout << "Algorithm " << algorithm << ":\n";
-        Score last_score;
-
-        // Anticipate that the current algorithm will fail to find any improvement.
-        ++no_improvement_count;
-        // Run algorithm 'algorithm'.
-        do
-        {
-//          std::cout << current_partition << " = " << current_score << '\n';
-          last_score = current_score;
-          for (auto neighboring_partition_iterator =
-              algorithm == 0 ? current_partition.begin<PartitionIteratorWholeGroup>() : current_partition.begin<PartitionIteratorSingleElement>() ;
-               neighboring_partition_iterator != current_partition.end();
-               ++neighboring_partition_iterator)
-          {
-            Partition neighboring_partition = *neighboring_partition_iterator;
-            Score neighboring_score = neighboring_partition.score();
-            if (neighboring_score > current_score)
-            {
-              current_partition = neighboring_partition;
-              current_score = neighboring_score;
-              no_improvement_count = 1;
-            }
-          }
-        }
-        while (current_score > last_score);       // If 'algorithm' found an improvement, run the same algorithm again.
-
-        // If none of the algorithms could improve, terminate the program.
-        if (no_improvement_count == number_of_algorithms)
-          break;
+        partition = partition2;
+        score = score2;
       }
+      if (++count == 100)
+        break;
     }
-    while (no_improvement_count < number_of_algorithms);
-    auto res = results.try_emplace(current_partition, 0);
+    auto res = results.try_emplace(partition, 0);
     res.first->second += 1;
-    if (current_score > max_score)
-      max_score = current_score;
+    if (score > max_score)
+      max_score = score;
   }
-  for (auto&& r : results)
-    std::cout << r.first.score() << " : " << r.first << " : " << r.second << '\n';
+  std::multimap<Score, std::map<Partition, int>::iterator> score_to_partition;
+  for (auto ri = results.begin(); ri != results.end(); ++ri)
+    score_to_partition.insert(std::make_pair(ri->first.score(), ri));
+  for (auto spi = score_to_partition.begin(); spi != score_to_partition.end(); ++spi)
+    std::cout << spi->first << " : " << spi->second->first << " : " << spi->second->second << '\n';
   std::cout << "Maximum score = " << max_score << '\n';
 }

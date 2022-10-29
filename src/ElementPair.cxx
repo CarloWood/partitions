@@ -4,6 +4,5 @@
 
 void ElementPair::print_on(std::ostream& os) const
 {
-  for (Element element : m_element_pair)
-    os << element;
+  os << '(' << m_element1 << ", " << m_element2 << ')';
 }

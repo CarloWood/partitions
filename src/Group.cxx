@@ -15,7 +15,7 @@ Score Group::score() const
       ++bit_iter2;
       while (bit_iter2 != m_elements.end())
       {
-        elements_t::mask_type score_index = (*bit_iter1)() | (*bit_iter2)();
+        int score_index = ElementPair{elements_t::mask2index((*bit_iter1)()), elements_t::mask2index((*bit_iter2)())}.score_index();
         sum += g_scores[score_index];
         ++bit_iter2;
       }

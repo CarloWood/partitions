@@ -21,9 +21,17 @@ class Group
   Group(Element element) : m_elements(element) { }
   explicit Group(elements_t elements) : m_elements(elements) { }
 
+  utils::bitset::const_iterator<elements_t::mask_type> begin() const { return m_elements.begin(); }
+  utils::bitset::const_iterator<elements_t::mask_type> end() const { return m_elements.end(); }
+
   bool empty() const
   {
     return m_elements.none();
+  }
+
+  void clear()
+  {
+    m_elements.reset();
   }
 
   Group& add(Group elements)
@@ -56,6 +64,11 @@ class Group
   bool is_single_bit() const
   {
     return m_elements.is_single_bit();
+  }
+
+  int element_count() const
+  {
+    return m_elements.count();
   }
 
   Score score() const;

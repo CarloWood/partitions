@@ -7,8 +7,8 @@
 
 using utils::has_print_on::operator<<;
 
-using elements_t = utils::BitSet<uint16_t>;
-constexpr int number_of_elements = 8; //30;
+using elements_t = utils::BitSet<uint64_t>;
+constexpr int number_of_elements = 24;
 
 class Element;
 using ElementIndex = elements_t::Index;
@@ -56,7 +56,7 @@ class Element
 
   static constexpr ElementIndex name_to_index(char name)
   {
-    return ElementIndex{static_cast<ElementIndexPOD>(name - 'A')};
+    return ElementIndex{ElementIndexPOD{static_cast<int8_t>(name - 'A')}};
   }
 
  public:

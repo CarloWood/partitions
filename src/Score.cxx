@@ -20,9 +20,6 @@ void Score::print_on(std::ostream& os) const
   }
 }
 
-constexpr ElementIndexPOD last_element_index{number_of_elements - 1};
-constexpr ElementIndexPOD second_last_element_index{number_of_elements - 2};
-constexpr ElementIndex last_element{last_element_index};
-constexpr ElementIndex second_last_element{second_last_element_index};
-constexpr elements_t::mask_type max_score_index = ElementPair{second_last_element, last_element}.get_pair().to_ulong();
-std::vector<Score> g_scores(max_score_index + 1);
+// See ElementPair::score_index().
+constexpr int scores_size = 64 * (number_of_elements - 1) + number_of_elements;
+std::vector<Score> g_scores(scores_size);

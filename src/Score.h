@@ -59,6 +59,15 @@ class Score
     return *this;
   }
 
+  friend Score operator-(Score const& lhs, Score const& rhs)
+  {
+    Score result = lhs;
+    result.m_number_of_positive_inf -= rhs.m_number_of_positive_inf;
+    result.m_value -= rhs.m_value;
+    result.m_number_of_negative_inf -= rhs.m_number_of_negative_inf;
+    return result;
+  }
+
   Score& operator=(Score score)
   {
     clear();
@@ -74,6 +83,11 @@ class Score
       return lhs.m_number_of_positive_inf < rhs.m_number_of_positive_inf;
 
     return lhs.m_value < rhs.m_value;
+  }
+
+  friend bool operator>=(Score const& lhs, Score const& rhs)
+  {
+    return !(lhs < rhs);
   }
 
   friend bool operator>(Score const& lhs, Score const& rhs)
