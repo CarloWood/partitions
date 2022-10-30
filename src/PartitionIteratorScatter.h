@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Partition.h"
-#include "GroupIteratorScatter.h"
+#include "SetIteratorScatter.h"
 #include <vector>
 
 // {ABCF}, {DG}, {EHI}
@@ -43,7 +43,7 @@ class PartitionIteratorScatter
 {
  private:
   Partition m_orig;
-  std::vector<std::pair<GroupIteratorScatter, GroupIndex>> m_group_iterators;
+  std::vector<std::pair<SetIteratorScatter, SetIndex>> m_set_iterators;
 
  public:
   // Create an end iterator.
@@ -55,7 +55,7 @@ class PartitionIteratorScatter
 
   bool is_end() const
   {
-    return m_group_iterators.empty();
+    return m_set_iterators.empty();
   }
 
   Partition operator*() const;

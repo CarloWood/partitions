@@ -5,17 +5,17 @@ void PartitionIteratorSingleElement::increment()
 {
   do
   {
-    if (++m_to_group == (m_current_element_is_alone ? m_number_of_groups_original - 1 : m_number_of_groups_original + 1))
+    if (++m_to_set == (m_current_element_is_alone ? m_number_of_sets_original - 1 : m_number_of_sets_original + 1))
     {
-      m_to_group.set_to_zero();
+      m_to_set.set_to_zero();
       if (++m_current_element_index == Element::iend())
       {
         set_to_end();
         break;
       }
       m_current_element_is_alone = m_original_partition.is_alone(m_current_element_index);
-      m_from_group = m_original_partition.group_of(m_current_element_index);
+      m_from_set = m_original_partition.set_of(m_current_element_index);
     }
   }
-  while (m_to_group == m_from_group);
+  while (m_to_set == m_from_set);
 }

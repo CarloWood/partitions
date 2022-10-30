@@ -1,10 +1,10 @@
 #include "sys.h"
-#include "Group.h"
+#include "Set.h"
 #include "ElementPair.h"
 #include <iostream>
 #include <vector>
 
-Score Group::score() const
+Score Set::score() const
 {
   Score sum;
   if (m_elements.any() && !m_elements.is_single_bit())
@@ -24,7 +24,7 @@ Score Group::score() const
   return sum;
 }
 
-void Group::print_on(std::ostream& os) const
+void Set::print_on(std::ostream& os) const
 {
   os << '{';
   for (ElementIndex i = Element::ibegin(); i != Element::iend(); ++i)

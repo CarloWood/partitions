@@ -1,7 +1,7 @@
 #include "sys.h"
 #include "Partition.h"
 #include "PartitionIteratorSingleElement.h"
-#include "PartitionIteratorWholeGroup.h"
+#include "PartitionIteratorWholeSet.h"
 #include "PartitionIteratorBruteForce.h"
 #include "PartitionIteratorScatter.h"
 #include <cassert>
@@ -10,8 +10,8 @@
 
 Partition::Partition()
 {
-  for (auto i = m_groups.ibegin(); i != m_groups.iend(); ++i)
-    m_groups[i] = Element{static_cast<char>('A' - (number_of_elements - 1 - i.get_value()))};
+  for (auto i = m_sets.ibegin(); i != m_sets.iend(); ++i)
+    m_sets[i] = Element{static_cast<char>('A' - (number_of_elements - 1 - i.get_value()))};
 }
 
 PartitionIterator Partition::end() const
@@ -19,14 +19,14 @@ PartitionIterator Partition::end() const
   return {};
 }
 
-void Partition::print_groups() const
+void Partition::print_sets() const
 {
   char const* separator = "";
   for (ElementIndex e = Element::ibegin(); e != Element::iend(); ++e)
   {
-    for (GroupIndex g = m_groups.ibegin(); g != m_groups.iend(); ++g)
+    for (SetIndex g = m_sets.ibegin(); g != m_sets.iend(); ++g)
     {
-      if (m_groups[g].test(e))
+      if (m_sets[g].test(e))
       {
         std::cout << separator << Element{e} << "=" << g.get_value();
         separator = ", ";
@@ -39,22 +39,22 @@ void Partition::print_on(std::ostream& os) const
 {
   os << '<';
   char const* prefix = "";
-  for (GroupIndex g = m_groups.ibegin(); g != m_groups.iend(); ++g)
+  for (SetIndex g = m_sets.ibegin(); g != m_sets.iend(); ++g)
   {
-    if (m_groups[g].empty())
+    if (m_sets[g].empty())
       break;
-    os << prefix << m_groups[g];
+    os << prefix << m_sets[g];
     prefix = ", ";
   }
   os << '>';
 }
 
-GroupIndex Partition::number_of_groups() const
+SetIndex Partition::number_of_sets() const
 {
-  GroupIndex g = m_groups.ibegin();
-  while (g != m_groups.iend())
+  SetIndex g = m_sets.ibegin();
+  while (g != m_sets.iend())
   {
-    if (m_groups[g].empty())
+    if (m_sets[g].empty())
       break;
     ++g;
   }
@@ -63,40 +63,40 @@ GroupIndex Partition::number_of_groups() const
 
 bool Partition::is_alone(Element element) const
 {
-  for (GroupIndex g = m_groups.ibegin(); g != m_groups.iend(); ++g)
-    if (m_groups[g].test(element))
-      return m_groups[g].is_single_bit();
+  for (SetIndex g = m_sets.ibegin(); g != m_sets.iend(); ++g)
+    if (m_sets[g].test(element))
+      return m_sets[g].is_single_bit();
   // Never reached.
   assert(false);
   return false;
 }
 
-GroupIndex Partition::group_of(Element element) const
+SetIndex Partition::set_of(Element element) const
 {
-  for (GroupIndex g = m_groups.ibegin(); g != m_groups.iend(); ++g)
-    if (m_groups[g].test(element))
+  for (SetIndex g = m_sets.ibegin(); g != m_sets.iend(); ++g)
+    if (m_sets[g].test(element))
       return g;
   // Never reached.
   assert(false);
   return {};
 }
 
-GroupIndex Partition::first_empty_group() const
+SetIndex Partition::first_empty_set() const
 {
-  for (GroupIndex g = m_groups.ibegin(); g != m_groups.iend(); ++g)
-    if (m_groups[g].empty())
+  for (SetIndex g = m_sets.ibegin(); g != m_sets.iend(); ++g)
+    if (m_sets[g].empty())
       return g;
-  return m_groups.iend();
+  return m_sets.iend();
 }
 
 Score Partition::score() const
 {
   Score sum;
-  for (GroupIndex g = m_groups.ibegin(); g != m_groups.iend(); ++g)
+  for (SetIndex g = m_sets.ibegin(); g != m_sets.iend(); ++g)
   {
-    if (m_groups[g].empty())
+    if (m_sets[g].empty())
       break;
-    sum += m_groups[g].score();
+    sum += m_sets[g].score();
   }
   return sum;
 }
@@ -140,7 +140,7 @@ Table "1"
 
 depth (d)
 |
-v   1   2   3   4   5 ...     <-- groups (g)
+v   1   2   3   4   5 ...     <-- sets (g)
 0   1   0   0   0   0 ...  1
 1   1   1   0   0   0 ...  2
 2   1   3   1   0   0 ...  5
@@ -168,43 +168,43 @@ namespace {
 
 using partition_count_t = unsigned long;
 
-// Cache of the number of partitions existing of 'groups' groups when starting with 'top_groups'
+// Cache of the number of partitions existing of 'sets' sets when starting with 'top_sets'
 // and adding 'depth' new elements.
 std::array<std::array<partition_count_t, number_of_elements * (number_of_elements + 1) / 2>, number_of_elements> table3d;
 
-// Returns a reference into the cache for a given top_groups, depth and groups.
-partition_count_t& number_of_partitions(int top_groups, int depth, int groups)
+// Returns a reference into the cache for a given top_sets, depth and sets.
+partition_count_t& number_of_partitions(int top_sets, int depth, int sets)
 {
   // The cache is compressed: we don't store the zeroes.
-  // That is, the inner array stores the triangle of non-zero values for a given 'Table' (for a given top_groups)
-  // and the table for 'top_groups' is shifted top_groups - 1 to the left.
-  return table3d[top_groups - 1][depth * (depth + 1) / 2 + groups - top_groups];
+  // That is, the inner array stores the triangle of non-zero values for a given 'Table' (for a given top_sets)
+  // and the table for 'top_sets' is shifted top_sets - 1 to the left.
+  return table3d[top_sets - 1][depth * (depth + 1) / 2 + sets - top_sets];
 }
 
-int table(int top_groups, int depth, int groups)
+int table(int top_sets, int depth, int sets)
 {
-  assert(top_groups + depth <= number_of_elements);
-  if (groups > depth + top_groups || groups < top_groups)
+  assert(top_sets + depth <= number_of_elements);
+  if (sets > depth + top_sets || sets < top_sets)
     return 0;
-  partition_count_t& te = number_of_partitions(top_groups, depth, groups);
+  partition_count_t& te = number_of_partitions(top_sets, depth, sets);
   if (te == 0)
   {
     if (depth == 0)
-      te = (groups == top_groups) ? 1 : 0;
-    else if (depth + top_groups == groups)
+      te = (sets == top_sets) ? 1 : 0;
+    else if (depth + top_sets == sets)
       te = 1;
     else
-      te = table(top_groups, depth - 1, groups - 1) + groups * table(top_groups, depth - 1, groups);
+      te = table(top_sets, depth - 1, sets - 1) + sets * table(top_sets, depth - 1, sets);
   }
   return te;
 }
 
-partition_count_t number_of_partitions(int top_groups, int depth)
+partition_count_t number_of_partitions(int top_sets, int depth)
 {
   partition_count_t sum = 0;
-  for (int groups = top_groups; groups <= number_of_elements; ++groups)
+  for (int sets = top_sets; sets <= number_of_elements; ++sets)
   {
-    partition_count_t term = table(top_groups, depth, groups);
+    partition_count_t term = table(top_sets, depth, sets);
     if (term == 0)
       break;
     sum += term;
@@ -212,24 +212,24 @@ partition_count_t number_of_partitions(int top_groups, int depth)
   return sum;
 }
 
-// Print the table 'top_groups'.
-void print_table(int top_groups)
+// Print the table 'top_sets'.
+void print_table(int top_sets)
 {
   std::cout << "  ";
-  for (int groups = 1; groups <= number_of_elements; ++groups)
+  for (int sets = 1; sets <= number_of_elements; ++sets)
   {
-    std::cout << std::setw(8) << groups;
+    std::cout << std::setw(8) << sets;
   }
   std::cout << '\n';
-  for (int depth = 0; depth <= number_of_elements - top_groups; ++depth)
+  for (int depth = 0; depth <= number_of_elements - top_sets; ++depth)
   {
     std::cout << std::setw(2) << depth;
-    for (int groups = 1; groups <= number_of_elements; ++groups)
+    for (int sets = 1; sets <= number_of_elements; ++sets)
     {
-      int v = table(top_groups, depth, groups);
+      int v = table(top_sets, depth, sets);
       std::cout << std::setw(8) << v;
     }
-    std::cout << " = " << number_of_partitions(top_groups, depth) << '\n';
+    std::cout << " = " << number_of_partitions(top_sets, depth) << '\n';
   }
   std::cout << '\n';
 }
@@ -242,40 +242,40 @@ utils::RandomNumber Partition::s_random_number;
 //static
 Partition Partition::random()
 {
-  Partition top(Group(Element('A')));
-  int top_groups = 1;   // The current_root has 1 group.
+  Partition top(Set(Element('A')));
+  int top_sets = 1;   // The current_root has 1 set.
   int top_elements = 1; // The current_root has 1 element.
   while (top_elements < number_of_elements)
   {
     Element const new_element('A' + top_elements);
     int depth = number_of_elements - top_elements;
-    partition_count_t existing_group = number_of_partitions(top_groups, depth - 1);
-    partition_count_t new_group = number_of_partitions(top_groups + 1, depth - 1);
-    partition_count_t total = top_groups * existing_group + new_group;
+    partition_count_t existing_set = number_of_partitions(top_sets, depth - 1);
+    partition_count_t new_set = number_of_partitions(top_sets + 1, depth - 1);
+    partition_count_t total = top_sets * existing_set + new_set;
 
 #if 0
     std::cout << "top = " << top << '\n';
-    std::cout << "top_groups = " << top_groups << '\n';
+    std::cout << "top_sets = " << top_sets << '\n';
     std::cout << "top_elements = " << top_elements << '\n';
     std::cout << "depth = " << depth << '\n';
-    std::cout << "existing_group = " << existing_group << '\n';
-    std::cout << "new_group = " << new_group << '\n';
+    std::cout << "existing_set = " << existing_set << '\n';
+    std::cout << "new_set = " << new_set << '\n';
     std::cout << "total = " << total << '\n';
 #endif
 
     std::uniform_int_distribution<partition_count_t> distr{0, total - 1};
     partition_count_t n = s_random_number.generate(distr);
 //    std::cout << "random number = " << n << '\n';
-    if (n >= top_groups * existing_group)
+    if (n >= top_sets * existing_set)
     {
-      // Add new element to new group.
-      top.add_to(GroupIndex{top_groups}, new_element);
-      ++top_groups;
+      // Add new element to new set.
+      top.add_to(SetIndex{top_sets}, new_element);
+      ++top_sets;
     }
     else
     {
-      // Add new element to existing group.
-      top.add_to(GroupIndex{static_cast<int>(n / existing_group)}, new_element);
+      // Add new element to existing set.
+      top.add_to(SetIndex{static_cast<int>(n / existing_set)}, new_element);
     }
     ++top_elements;
   }
@@ -303,7 +303,7 @@ Score Partition::find_local_maximum()
 //          std::cout << *this << " = " << current_score << '\n';
         last_score = current_score;
         for (auto neighboring_partition_iterator =
-            algorithm == 0 ? begin<PartitionIteratorWholeGroup>() : begin<PartitionIteratorSingleElement>() ;
+            algorithm == 0 ? begin<PartitionIteratorWholeSet>() : begin<PartitionIteratorSingleElement>() ;
              neighboring_partition_iterator != end();
              ++neighboring_partition_iterator)
         {
@@ -311,7 +311,7 @@ Score Partition::find_local_maximum()
           Score neighboring_score = neighboring_partition.score();
           if (neighboring_score > current_score)
           {
-            m_groups = neighboring_partition.m_groups;
+            m_sets = neighboring_partition.m_sets;
             current_score = neighboring_score;
             no_improvement_count = 1;
           }

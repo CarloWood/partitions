@@ -2,7 +2,7 @@
 #define PARTITION_H
 
 #include "Element.h"
-#include "Group.h"
+#include "Set.h"
 #include "utils/Array.h"
 #include "utils/RandomNumber.h"
 #include <iosfwd>
@@ -16,31 +16,31 @@ class Partition
 {
  private:
   friend class PartitionIterator;
-  utils::Array<Group, number_of_elements, GroupIndex> m_groups;
+  utils::Array<Set, number_of_elements, SetIndex> m_sets;
 
  public:
   Partition();
 
-  template<ConceptGroup... GROUP>
-  Partition(GROUP... groups) : m_groups{groups...}
+  template<ConceptSet... GROUP>
+  Partition(GROUP... sets) : m_sets{sets...}
   {
-    for (GroupIndex gi{sizeof...(groups)}; gi != m_groups.iend(); ++gi)
-      m_groups[gi] = Group{elements_t{elements_t::mask_type{0}}};
+    for (SetIndex gi{sizeof...(sets)}; gi != m_sets.iend(); ++gi)
+      m_sets[gi] = Set{elements_t{elements_t::mask_type{0}}};
     sort();
   }
 
-  Partition(utils::Array<Group, number_of_elements, GroupIndex> const& groups) : m_groups(groups) { sort(); }
+  Partition(utils::Array<Set, number_of_elements, SetIndex> const& sets) : m_sets(sets) { sort(); }
 
-  void print_groups() const;
+  void print_sets() const;
   void print_on(std::ostream& os) const;
 
-  Group group(GroupIndex group_index) const
+  Set set(SetIndex set_index) const
   {
-    return m_groups[group_index];
+    return m_sets[set_index];
   }
 
-  auto gbegin() const { return m_groups.ibegin(); }
-  auto gend() const { return m_groups.iend(); }
+  auto gbegin() const { return m_sets.ibegin(); }
+  auto gend() const { return m_sets.iend(); }
 
   template<typename Algorithm>
   PartitionIterator begin() const;
@@ -56,32 +56,32 @@ class Partition
   static utils::RandomNumber s_random_number;
   static Partition random();
 
-  GroupIndex number_of_groups() const;
+  SetIndex number_of_sets() const;
   bool is_alone(Element element) const;
-  GroupIndex group_of(Element element) const;
-  GroupIndex first_empty_group() const;
+  SetIndex set_of(Element element) const;
+  SetIndex first_empty_set() const;
   Score score() const;
 
   void sort()
   {
-    std::sort(m_groups.rbegin(), m_groups.rend());
+    std::sort(m_sets.rbegin(), m_sets.rend());
   }
 
-  void add_to(GroupIndex group_index, Group group)
+  void add_to(SetIndex set_index, Set set)
   {
-    m_groups[group_index].add(group);
+    m_sets[set_index].add(set);
   }
 
-  void remove_from(GroupIndex group_index, Group group)
+  void remove_from(SetIndex set_index, Set set)
   {
-    m_groups[group_index].remove(group);
+    m_sets[set_index].remove(set);
   }
 
   Score find_local_maximum();
 
   friend bool operator<(Partition const& lhs, Partition const& rhs)
   {
-    return lhs.m_groups < rhs.m_groups;
+    return lhs.m_sets < rhs.m_sets;
   }
 
   friend std::ostream& operator<<(std::ostream& os, Partition const& partition);

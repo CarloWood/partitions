@@ -19,15 +19,15 @@ PartitionIterator::~PartitionIterator()
 Partition PartitionIterator::operator*() const
 {
   Partition p = m_base->original_partition();
-  Group moved = m_base->moved_elements();
-  assert(!m_base->from_group().undefined());
-  assert(p.m_groups.ibegin() <= m_base->from_group());
-  assert(m_base->from_group() < p.m_groups.iend());
-  p.m_groups[m_base->from_group()].remove(moved);
-  assert(!m_base->to_group().undefined());
-  assert(p.m_groups.ibegin() <= m_base->to_group());
-  assert(m_base->to_group() < p.m_groups.iend());
-  p.m_groups[m_base->to_group()].add(moved);
+  Set moved = m_base->moved_elements();
+  assert(!m_base->from_set().undefined());
+  assert(p.m_sets.ibegin() <= m_base->from_set());
+  assert(m_base->from_set() < p.m_sets.iend());
+  p.m_sets[m_base->from_set()].remove(moved);
+  assert(!m_base->to_set().undefined());
+  assert(p.m_sets.ibegin() <= m_base->to_set());
+  assert(m_base->to_set() < p.m_sets.iend());
+  p.m_sets[m_base->to_set()].add(moved);
   p.sort();
   return p;
 }

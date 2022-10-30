@@ -7,7 +7,7 @@ PartitionIteratorBruteForce::PartitionIteratorBruteForce(int) : m_multiloop(numb
   {
     for (;;)
     {
-      // A loop ends when moving the element to the next group would leave its current group empty.
+      // A loop ends when moving the element to the next set would leave its current set empty.
       if (m_multiloop() > 0 && --m_loop_value_count[m_multiloop() - 1] == 0)
         break;
       ++m_loop_value_count[m_multiloop()];
@@ -44,10 +44,10 @@ PartitionIteratorBruteForce& PartitionIteratorBruteForce::operator++()
 
 Partition PartitionIteratorBruteForce::operator*() const
 {
-  utils::Array<Group, number_of_elements, GroupIndex> groups;
-  for (GroupIndex g = groups.ibegin(); g != groups.iend(); ++g)
-    groups[g] = Group{elements_t{0}};
+  utils::Array<Set, number_of_elements, SetIndex> sets;
+  for (SetIndex g = sets.ibegin(); g != sets.iend(); ++g)
+    sets[g] = Set{elements_t{0}};
   for (ElementIndex l{Element::s_ibegin}; l < Element::s_iend; ++l)
-    groups[GroupIndex{m_multiloop[l()]}].add(Element{l});
-  return {groups};
+    sets[SetIndex{m_multiloop[l()]}].add(Element{l});
+  return {sets};
 }

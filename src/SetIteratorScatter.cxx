@@ -1,9 +1,9 @@
 #include "sys.h"
-#include "GroupIteratorScatter.h"
+#include "SetIteratorScatter.h"
 #include "ElementPair.h"
 
 //static
-void GroupIteratorScatter::initialize()
+void SetIteratorScatter::initialize()
 {
   for (ElementIndex i1 = Element::ibegin(); i1 != Element::iend(); ++i1)
   {
@@ -15,7 +15,7 @@ void GroupIteratorScatter::initialize()
       Score zero;
       //Dout(dc::notice, "ep = " << ep << "; score = " << score << "; zero < score = " << std::boolalpha << (zero < score));
       if (zero < score)
-        s_group23_to_score[Group(Element{i1}|Element{i2})] = score;
+        s_set23_to_score[Set(Element{i1}|Element{i2})] = score;
       for (ElementIndex i3 = i2 + 1; i3 != Element::iend(); ++i3)
       {
         ElementPair ep13(i1, i3);
@@ -28,11 +28,11 @@ void GroupIteratorScatter::initialize()
         score3 += score13;
         score3 += score23;
         if (zero < score3)
-          s_group23_to_score[Group(Element{i1}|Element{i2}|Element{i3})] = score3;
+          s_set23_to_score[Set(Element{i1}|Element{i2}|Element{i3})] = score3;
       }
     }
   }
-//  for (auto p : s_group23_to_score)
+//  for (auto p : s_set23_to_score)
 //    s_scores23.insert(std::make_pair(p.second, p.first));
 
 //  for (auto s : s_scores23)
@@ -40,15 +40,15 @@ void GroupIteratorScatter::initialize()
 }
 
 //static
-std::map<Group, Score> GroupIteratorScatter::s_group23_to_score;
-//std::multimap<Score, Group> GroupIteratorScatter::s_scores23;
-std::once_flag GroupIteratorScatter::s_initialize_flag;
+std::map<Set, Score> SetIteratorScatter::s_set23_to_score;
+//std::multimap<Score, Set> SetIteratorScatter::s_scores23;
+std::once_flag SetIteratorScatter::s_initialize_flag;
 
-GroupIteratorScatter::GroupIteratorScatter(Group orig) : m_orig(orig), m_method_A(std::make_shared<method_A_container_t>())
+SetIteratorScatter::SetIteratorScatter(Set orig) : m_orig(orig), m_method_A(std::make_shared<method_A_container_t>())
 {
-  std::call_once(s_initialize_flag, GroupIteratorScatter::initialize);
+  std::call_once(s_initialize_flag, SetIteratorScatter::initialize);
   int orig_element_count = m_orig.element_count();
-  // Don't try to iterate over a group that has less than 3 elements.
+  // Don't try to iterate over a set that has less than 3 elements.
   ASSERT(orig_element_count > 2);
   for (auto element1 = m_orig.begin(); element1 != m_orig.end(); ++element1)
   {
@@ -59,12 +59,12 @@ GroupIteratorScatter::GroupIteratorScatter(Group orig) : m_orig(orig), m_method_
       for (++element3;; ++element3)
       {
         bool no_element3 = element3 == m_orig.end();
-        Group group23{*element1};
-        group23.add(Group{*element2});
+        Set set23{*element1};
+        set23.add(Set{*element2});
         if (!no_element3)
-          group23.add(Group{*element3});
-        Score score = s_group23_to_score[group23];
-        m_method_A->insert(std::make_pair(score, group23));
+          set23.add(Set{*element3});
+        Score score = s_set23_to_score[set23];
+        m_method_A->insert(std::make_pair(score, set23));
         if (no_element3)
           break;
       }
@@ -73,20 +73,20 @@ GroupIteratorScatter::GroupIteratorScatter(Group orig) : m_orig(orig), m_method_
   m_current_A = m_method_A->begin();
 }
 
-GroupIteratorScatter& GroupIteratorScatter::operator++()
+SetIteratorScatter& SetIteratorScatter::operator++()
 {
   if (++m_current_A == m_method_A->end())
     m_orig.clear();
   return *this;
 }
 
-Group GroupIteratorScatter::operator*() const
+Set SetIteratorScatter::operator*() const
 {
   return m_current_A->second;
 }
 
 // Return amount the score goes down the next iteration.
-Score GroupIteratorScatter::score_difference() const
+Score SetIteratorScatter::score_difference() const
 {
   // Don't call score_of_next_iteration() on end().
   ASSERT(!is_end());
@@ -99,12 +99,12 @@ Score GroupIteratorScatter::score_difference() const
   return score - next_score;
 }
 
-  Group m_orig;
-  using method_A_container_t = std::multimap<Score, Group, std::greater<Score>>;
+  Set m_orig;
+  using method_A_container_t = std::multimap<Score, Set, std::greater<Score>>;
   std::shared_ptr<method_A_container_t> m_method_A;
   method_A_container_t::const_iterator m_current_A;
 
-void GroupIteratorScatter::print_on(std::ostream& os) const
+void SetIteratorScatter::print_on(std::ostream& os) const
 {
   os << '{';
   os << "  m_orig: " << m_orig << '\n';

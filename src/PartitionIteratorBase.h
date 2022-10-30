@@ -8,54 +8,54 @@ class PartitionIteratorBase
  protected:
   // The partition that we iterator over.
   Partition const m_original_partition;
-  GroupIndex const m_number_of_groups_original;
+  SetIndex const m_number_of_sets_original;
 
-  GroupIndex m_from_group{};            // The group that we're moving from.
+  SetIndex m_from_set{};            // The set that we're moving from.
   // Loop variable.
-  GroupIndex m_to_group{0};             // The group that we're moving to.
+  SetIndex m_to_set{0};             // The set that we're moving to.
 
  public:
   // Construct the 'end' iterator.
-  PartitionIteratorBase() : m_to_group{} { }
+  PartitionIteratorBase() : m_to_set{} { }
 
-  PartitionIteratorBase(Partition const& orig, GroupIndex from_group_index) :
+  PartitionIteratorBase(Partition const& orig, SetIndex from_set_index) :
     m_original_partition(orig),
-    m_number_of_groups_original(orig.number_of_groups()),
-    m_from_group(from_group_index) { }
+    m_number_of_sets_original(orig.number_of_sets()),
+    m_from_set(from_set_index) { }
 
   Partition const& original_partition() const
   {
     return m_original_partition;
   }
 
-  GroupIndex from_group() const
+  SetIndex from_set() const
   {
-    return m_from_group;
+    return m_from_set;
   }
 
-  GroupIndex to_group() const
+  SetIndex to_set() const
   {
-    return m_to_group;
+    return m_to_set;
   }
 
   void kick_start()
   {
-    if (m_from_group == m_to_group)
+    if (m_from_set == m_to_set)
       increment();
   }
 
   void set_to_end()
   {
-    m_from_group.set_to_undefined();
+    m_from_set.set_to_undefined();
   }
 
   bool is_end() const
   {
-    return m_from_group.undefined();
+    return m_from_set.undefined();
   }
 
  virtual void increment() = 0;
- virtual Group moved_elements() const = 0;
+ virtual Set moved_elements() const = 0;
  virtual bool unequal(PartitionIteratorBase const& rhs) const = 0;
 };
 

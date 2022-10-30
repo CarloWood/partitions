@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Group.h"
+#include "Set.h"
 #include "Score.h"
 #include <map>
 #include <mutex>
@@ -19,36 +19,36 @@
 // {ACF}
 // {BCF}
 
-class GroupIteratorScatter
+class SetIteratorScatter
 {
  private:
-  static std::map<Group, Score> s_group23_to_score;     // Required for method A.
-//  static std::multimap<Score, Group> s_scores23;        // Required for method B.
+  static std::map<Set, Score> s_set23_to_score;     // Required for method A.
+//  static std::multimap<Score, Set> s_scores23;        // Required for method B.
   static std::once_flag s_initialize_flag;
 
-  Group m_orig;
+  Set m_orig;
 //  bool m_use_method_B;  // False: generate all results in advance and then sort them.
                         // True: run over all possible pairs/triplets in order of score.
-  using method_A_container_t = std::multimap<Score, Group, std::greater<Score>>;
+  using method_A_container_t = std::multimap<Score, Set, std::greater<Score>>;
   std::shared_ptr<method_A_container_t> m_method_A;
   method_A_container_t::const_iterator m_current_A;
 
  public:
   // Create an end iterator.
-  GroupIteratorScatter() : m_orig(elements_t{elements_t::mask_type{0}}) { }
+  SetIteratorScatter() : m_orig(elements_t{elements_t::mask_type{0}}) { }
   // Create the begin iterator.
-  GroupIteratorScatter(Group orig);
+  SetIteratorScatter(Set orig);
 
   static void initialize();
 
-  GroupIteratorScatter& operator++();
+  SetIteratorScatter& operator++();
 
   bool is_end() const
   {
     return m_orig.empty();
   }
 
-  Group operator*() const;
+  Set operator*() const;
 
   Score score_difference() const;
 

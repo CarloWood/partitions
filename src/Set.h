@@ -8,18 +8,18 @@
 #include <cassert>
 #include <concepts>
 
-class Group;
-using GroupIndex = utils::ArrayIndex<Group>;
+class Set;
+using SetIndex = utils::ArrayIndex<Set>;
 
-class Group
+class Set
 {
  private:
   elements_t m_elements{};
 
  public:
-  Group() = default;
-  Group(Element element) : m_elements(element) { }
-  explicit Group(elements_t elements) : m_elements(elements) { }
+  Set() = default;
+  Set(Element element) : m_elements(element) { }
+  explicit Set(elements_t elements) : m_elements(elements) { }
 
   utils::bitset::const_iterator<elements_t::mask_type> begin() const { return m_elements.begin(); }
   utils::bitset::const_iterator<elements_t::mask_type> end() const { return m_elements.end(); }
@@ -34,7 +34,7 @@ class Group
     m_elements.reset();
   }
 
-  Group& add(Group elements)
+  Set& add(Set elements)
   {
     // Don't add existing elements.
     assert(!m_elements.test(elements.m_elements));
@@ -42,15 +42,15 @@ class Group
     return *this;
   }
 
-  Group& remove(Group group)
+  Set& remove(Set set)
   {
     // Don't try to remove non-existing elements.
-    assert((m_elements & group.m_elements) == group.m_elements);
-    m_elements &= ~group.m_elements;
+    assert((m_elements & set.m_elements) == set.m_elements);
+    m_elements &= ~set.m_elements;
     return *this;
   }
 
-  Group& toggle(Element element)
+  Set& toggle(Element element)
   {
     m_elements ^= element;
     return *this;
@@ -73,7 +73,7 @@ class Group
 
   Score score() const;
 
-  friend bool operator<(Group lhs, Group rhs)
+  friend bool operator<(Set lhs, Set rhs)
   {
     return utils::reverse_bits(lhs.m_elements()) < utils::reverse_bits(rhs.m_elements());
   }
@@ -82,4 +82,4 @@ class Group
 };
 
 template<typename T>
-concept ConceptGroup = std::is_convertible_v<T, Group>;
+concept ConceptSet = std::is_convertible_v<T, Set>;

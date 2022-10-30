@@ -1,4 +1,4 @@
 include(AICxxProject)
 
-add_executable(partitions partitions.cxx Element.cxx ElementPair.cxx Group.cxx Partition.cxx PartitionIteratorSingleElement.cxx PartitionIteratorWholeGroup.cxx PartitionIteratorBruteForce.cxx PartitionIteratorScatter.cxx GroupIteratorScatter.cxx PartitionIterator.cxx Score.cxx)
+add_executable(partitions partitions.cxx Element.cxx ElementPair.cxx Set.cxx Partition.cxx PartitionIteratorSingleElement.cxx PartitionIteratorWholeSet.cxx PartitionIteratorBruteForce.cxx PartitionIteratorScatter.cxx SetIteratorScatter.cxx PartitionIterator.cxx Score.cxx)
 target_link_libraries(partitions PRIVATE ${AICXX_OBJECTS_LIST})

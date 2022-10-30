@@ -2,7 +2,7 @@
 #include "ElementPair.h"
 #include "Partition.h"
 #include "PartitionIteratorScatter.h"
-#include "GroupIteratorScatter.h"
+#include "SetIteratorScatter.h"
 #include "utils/MultiLoop.h"
 #include "utils/debug_ostream_operators.h"
 #include "utils/RandomNumber.h"

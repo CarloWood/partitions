@@ -2,9 +2,9 @@
 #include "PartitionIteratorScatter.h"
 #include "utils/VectorCompare.h"
 
-struct GroupIteratorCompare
+struct SetIteratorCompare
 {
-  bool operator()(std::pair<GroupIteratorScatter, GroupIndex> const& lhs, std::pair<GroupIteratorScatter, GroupIndex> const& rhs) const
+  bool operator()(std::pair<SetIteratorScatter, SetIndex> const& lhs, std::pair<SetIteratorScatter, SetIndex> const& rhs) const
   {
     return lhs.first.score_difference() < rhs.first.score_difference();
   }
@@ -12,16 +12,16 @@ struct GroupIteratorCompare
 
 PartitionIteratorScatter::PartitionIteratorScatter(Partition orig) : m_orig(orig)
 {
-  for (GroupIndex gi = m_orig.gbegin(); gi != m_orig.gend(); ++gi)
+  for (SetIndex gi = m_orig.gbegin(); gi != m_orig.gend(); ++gi)
   {
-    Group g = m_orig.group(gi);
+    Set g = m_orig.set(gi);
     int element_count = g.element_count();
     if (element_count == 0)
       break;
     if (element_count > 2)
-      m_group_iterators.emplace_back(std::make_pair(g, gi));
+      m_set_iterators.emplace_back(std::make_pair(g, gi));
   }
-  std::sort(m_group_iterators.begin(), m_group_iterators.end(), GroupIteratorCompare{});
+  std::sort(m_set_iterators.begin(), m_set_iterators.end(), SetIteratorCompare{});
 }
 
 PartitionIteratorScatter& PartitionIteratorScatter::operator++()
@@ -39,15 +39,15 @@ PartitionIteratorScatter& PartitionIteratorScatter::operator++()
   //  89, 65, 55
   //  89, 40, 55
 
-  GroupIteratorScatter const& gis = ++(m_group_iterators.begin()->first);
+  SetIteratorScatter const& gis = ++(m_set_iterators.begin()->first);
   if (gis.is_end())
-    m_group_iterators.clear();
+    m_set_iterators.clear();
   else
   {
     Score new_score_difference = gis.score_difference();
-    auto end = std::find_if(m_group_iterators.begin() + 1, m_group_iterators.end(), [&](std::pair<GroupIteratorScatter, GroupIndex> const& v){ return v.first.score_difference() >= new_score_difference; });
-    if (m_group_iterators.begin() + 1 != end)
-      std::rotate(m_group_iterators.begin(), m_group_iterators.begin() + 1, end);
+    auto end = std::find_if(m_set_iterators.begin() + 1, m_set_iterators.end(), [&](std::pair<SetIteratorScatter, SetIndex> const& v){ return v.first.score_difference() >= new_score_difference; });
+    if (m_set_iterators.begin() + 1 != end)
+      std::rotate(m_set_iterators.begin(), m_set_iterators.begin() + 1, end);
   }
 
   return *this;
@@ -56,12 +56,12 @@ PartitionIteratorScatter& PartitionIteratorScatter::operator++()
 Partition PartitionIteratorScatter::operator*() const
 {
   Partition result = m_orig;
-  GroupIndex feg = result.first_empty_group();
-  for (auto& gisp : m_group_iterators)
+  SetIndex feg = result.first_empty_set();
+  for (auto& gisp : m_set_iterators)
   {
-    GroupIteratorScatter const& gis = gisp.first;
-    Group g = *gis;
-    GroupIndex gi = gisp.second;
+    SetIteratorScatter const& gis = gisp.first;
+    Set g = *gis;
+    SetIndex gi = gisp.second;
     result.remove_from(gi, g);
     result.add_to(feg++, g);
   }
