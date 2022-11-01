@@ -3,7 +3,7 @@
 #include "Partition.h"
 #include "PartitionIteratorScatter.h"
 #include "PartitionTask.h"
-#include "SetIteratorScatter.h"
+#include "PairTripletIteratorScatter.h"
 #include "utils/MultiLoop.h"
 #include "utils/debug_ostream_operators.h"
 #include "utils/RandomNumber.h"
@@ -18,7 +18,7 @@
 #include <cmath>
 #include "debug.h"
 
-constexpr int number_of_elements2 = 6;
+constexpr int number_of_elements = 3;
 
 std::array<Score, 8> g_possible_scores = {
   negative_inf,
@@ -33,12 +33,12 @@ std::array<Score, 8> g_possible_scores = {
 
 std::array<int, 8> frequency = {
   1,
-  number_of_elements2,
-  number_of_elements2,
-  number_of_elements2,
-  number_of_elements2,
-  number_of_elements2,
-  number_of_elements2,
+  number_of_elements,
+  number_of_elements,
+  number_of_elements,
+  number_of_elements,
+  number_of_elements,
+  number_of_elements,
   1
 };
 
@@ -85,7 +85,7 @@ int main()
   utils::RandomNumber random_number(0x5ec5853653bbd);
   std::uniform_int_distribution<int> distribution(0, frequency_sum - 1);
 
-  PartitionTask partition_task(number_of_elements2);
+  PartitionTask partition_task(number_of_elements);
 
   char const* sep = "    ";
   std::cout << "    ";
@@ -118,28 +118,32 @@ int main()
   std::map<Partition, int> results;
   for (int rp = 0; rp < 100; ++rp)
   {
+#if 0
     utils::Array<Set, max_number_of_elements, SetIndex> a = {
       Set{A|D|F},
       Set{B|C|E},
     };
-    Partition partition(ElementIndex{ElementIndexPOD{6}}, a); // = Partition::random(number_of_elements2);
-    //Partition partition = Partition::random(number_of_elements2);
+    Partition partition(ElementIndex{ElementIndexPOD{6}}, a); // = Partition::random(number_of_elements);
+#endif
+    Partition partition = partition_task.random();
+//    Dout(dc::notice, "Original: " << partition);
     Score score = partition.find_local_maximum(partition_task);
-    std::cout << " = " << score << std::endl;
+//    Dout(dc::notice, "Local maximum: " << partition << " = " << score);
     int count = 0;
-    for (PartitionIteratorScatter scatter = partition.sbegin(); !scatter.is_end(); ++scatter)
+    for (PartitionIteratorScatter scatter = partition.sbegin(partition_task); !scatter.is_end(); ++scatter)
     {
-      Dout(dc::notice, "scatter = " << scatter);
+//      Dout(dc::notice, "scatter = " << scatter);
       Partition partition2 = *scatter;
-      Dout(dc::notice, "partition2 = " << partition2);
+//      Dout(dc::notice, "Scatter partition2 = " << partition2);
       Score score2 = partition2.find_local_maximum(partition_task);
-      Dout(dc::notice, "partition2 = " << partition2 << " = " << score2);
+//      Dout(dc::notice, "Local maximum partition2 = " << partition2 << " = " << score2);
       if (score2 > score)
       {
+//        Dout(dc::notice, "scatter improvement: " << partition2 << " = " << score2);
         partition = partition2;
         score = score2;
       }
-      if (++count == 100)
+      if (++count == PartitionIteratorScatter::total_loop_count_limit)
         break;
     }
     auto res = results.try_emplace(partition, 0);

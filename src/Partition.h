@@ -25,6 +25,8 @@ class Partition
   Partition(ElementIndex number_of_elements, utils::Array<Set, max_number_of_elements, SetIndex> const& sets) :
     m_sets(sets.begin(), sets.begin() + number_of_elements())
   {
+    //FIXME: remove this. Do we ever get here?
+    ASSERT(false);
     sort();
   }
 
@@ -47,11 +49,8 @@ class Partition
 
   PartitionIterator end() const;
 
-  PartitionIteratorScatter sbegin();
+  PartitionIteratorScatter sbegin(PartitionTask const& partition_task);
   PartitionIteratorScatter send();
-
-  static utils::RandomNumber s_random_number;
-  static Partition random(int number_of_elements);
 
   SetIndex number_of_sets() const;
   bool is_alone(Element element) const;

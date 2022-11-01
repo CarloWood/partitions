@@ -19,30 +19,30 @@
 // {ACF}
 // {BCF}
 
-class SetIteratorScatter
+class PairTripletIteratorScatter
 {
  private:
-  static std::map<Set, Score> s_set23_to_score;     // Required for method A.
-  static std::once_flag s_initialize_flag;
-
   Set m_orig;
   using method_A_container_t = std::multimap<Score, Set, std::greater<Score>>;
   std::shared_ptr<method_A_container_t> m_method_A;
   method_A_container_t::const_iterator m_current_A;
 
  public:
-  // Create an end iterator.
-  SetIteratorScatter() : m_orig(elements_t{elements_t::mask_type{0}}) { }
   // Create the begin iterator.
-  SetIteratorScatter(Set orig);
+  PairTripletIteratorScatter(PartitionTask const& partition_task, Set orig);
 
   static void initialize();
 
-  SetIteratorScatter& operator++();
+  PairTripletIteratorScatter& operator++();
+
+  void reset()
+  {
+    m_current_A = m_method_A->begin();
+  }
 
   bool is_end() const
   {
-    return m_orig.empty();
+    return m_current_A == m_method_A->end();
   }
 
   Set operator*() const;

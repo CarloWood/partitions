@@ -143,6 +143,48 @@ void PartitionTask::initialize_set23_to_score()
   }
 }
 
+Partition PartitionTask::random()
+{
+  Partition top(m_number_of_elements, Set(Element('A')));
+  int top_sets = 1;   // The current_root has 1 set.
+  int top_elements = 1; // The current_root has 1 element.
+  while (top_elements < m_number_of_elements)
+  {
+    Element const new_element('A' + top_elements);
+    int depth = m_number_of_elements - top_elements;
+    partition_count_t existing_set = PartitionTask::number_of_partitions(top_sets, depth - 1);
+    partition_count_t new_set = PartitionTask::number_of_partitions(top_sets + 1, depth - 1);
+    partition_count_t total = top_sets * existing_set + new_set;
+
+#if 0
+    std::cout << "top = " << top << '\n';
+    std::cout << "top_sets = " << top_sets << '\n';
+    std::cout << "top_elements = " << top_elements << '\n';
+    std::cout << "depth = " << depth << '\n';
+    std::cout << "existing_set = " << existing_set << '\n';
+    std::cout << "new_set = " << new_set << '\n';
+    std::cout << "total = " << total << '\n';
+#endif
+
+    std::uniform_int_distribution<partition_count_t> distr{0, total - 1};
+    partition_count_t n = m_random_number.generate(distr);
+//    std::cout << "random number = " << n << '\n';
+    if (n >= top_sets * existing_set)
+    {
+      // Add new element to new set.
+      top.add_to(SetIndex{top_sets}, new_element);
+      ++top_sets;
+    }
+    else
+    {
+      // Add new element to existing set.
+      top.add_to(SetIndex{static_cast<int>(n / existing_set)}, new_element);
+    }
+    ++top_elements;
+  }
+  return top;
+}
+
 void PartitionTask::print_on(std::ostream& os) const
 {
   os << '{';

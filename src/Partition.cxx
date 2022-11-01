@@ -108,9 +108,9 @@ std::ostream& operator<<(std::ostream& os, Partition const& partition)
   return os;
 }
 
-PartitionIteratorScatter Partition::sbegin()
+PartitionIteratorScatter Partition::sbegin(PartitionTask const& partition_task)
 {
-  return {*this};
+  return {partition_task, *this};
 }
 
 PartitionIteratorScatter Partition::send()
@@ -118,57 +118,9 @@ PartitionIteratorScatter Partition::send()
   return {};
 }
 
-//static
-utils::RandomNumber Partition::s_random_number;
-
-//static
-Partition Partition::random(int number_of_elements)
-{
-  using partition_count_t = PartitionTask::partition_count_t;
-
-  Partition top(number_of_elements, Set(Element('A')));
-  int top_sets = 1;   // The current_root has 1 set.
-  int top_elements = 1; // The current_root has 1 element.
-  while (top_elements < number_of_elements)
-  {
-    Element const new_element('A' + top_elements);
-    int depth = number_of_elements - top_elements;
-    partition_count_t existing_set = PartitionTask::number_of_partitions(top_sets, depth - 1);
-    partition_count_t new_set = PartitionTask::number_of_partitions(top_sets + 1, depth - 1);
-    partition_count_t total = top_sets * existing_set + new_set;
-
-#if 0
-    std::cout << "top = " << top << '\n';
-    std::cout << "top_sets = " << top_sets << '\n';
-    std::cout << "top_elements = " << top_elements << '\n';
-    std::cout << "depth = " << depth << '\n';
-    std::cout << "existing_set = " << existing_set << '\n';
-    std::cout << "new_set = " << new_set << '\n';
-    std::cout << "total = " << total << '\n';
-#endif
-
-    std::uniform_int_distribution<partition_count_t> distr{0, total - 1};
-    partition_count_t n = s_random_number.generate(distr);
-//    std::cout << "random number = " << n << '\n';
-    if (n >= top_sets * existing_set)
-    {
-      // Add new element to new set.
-      top.add_to(SetIndex{top_sets}, new_element);
-      ++top_sets;
-    }
-    else
-    {
-      // Add new element to existing set.
-      top.add_to(SetIndex{static_cast<int>(n / existing_set)}, new_element);
-    }
-    ++top_elements;
-  }
-  return top;
-}
-
 Score Partition::find_local_maximum(PartitionTask const& partition_task)
 {
-  DoutEntering(dc::notice, "Partition::find_local_maximum(" << partition_task << ")");
+//  DoutEntering(dc::notice, "Partition::find_local_maximum(" << partition_task << ")");
   Score current_score = score(partition_task);
   constexpr int number_of_algorithms = 2;
   int no_improvement_count = 0;
@@ -176,7 +128,7 @@ Score Partition::find_local_maximum(PartitionTask const& partition_task)
   {
     for (int algorithm = 0; algorithm < number_of_algorithms; ++algorithm)
     {
-      Dout(dc::notice, "algorithm = " << algorithm);
+//      Dout(dc::notice, "algorithm = " << algorithm);
       Score last_score;
 
       // Anticipate that the current algorithm will fail to find any improvement.
@@ -184,7 +136,7 @@ Score Partition::find_local_maximum(PartitionTask const& partition_task)
       // Run algorithm 'algorithm'.
       do
       {
-        Dout(dc::notice, *this << " = " << current_score);
+//        Dout(dc::notice, *this << " = " << current_score);
         last_score = current_score;
 
         for (auto neighboring_partition_iterator =
@@ -192,11 +144,11 @@ Score Partition::find_local_maximum(PartitionTask const& partition_task)
              neighboring_partition_iterator != end();
              ++neighboring_partition_iterator)
         {
-          Dout(dc::notice, "neighboring_partition_iterator = " << neighboring_partition_iterator);
+//          Dout(dc::notice, "neighboring_partition_iterator = " << neighboring_partition_iterator);
           Partition neighboring_partition = *neighboring_partition_iterator;
-          Dout(dc::notice, "neighboring_partition = " << neighboring_partition);
+//          Dout(dc::notice, "neighboring_partition = " << neighboring_partition);
           Score neighboring_score = neighboring_partition.score(partition_task);
-          Dout(dc::notice, "neighboring_score = " << neighboring_score);
+//          Dout(dc::notice, "neighboring_score = " << neighboring_score);
           if (neighboring_score > current_score)
           {
             m_sets = neighboring_partition.m_sets;

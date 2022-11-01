@@ -1,7 +1,8 @@
 #pragma once
 
 #include "Partition.h"
-#include "SetIteratorScatter.h"
+#include "PairTripletIteratorScatter.h"
+#include "utils/MultiLoop.h"
 #include <vector>
 
 // {ABCF}, {DG}, {EHI}
@@ -39,24 +40,53 @@
 // {BCD}, {A}, {DG}, {EI}, {H}
 // {BCD}, {A}, {DG}, {E}, {HI}
 
+struct SetIteratorCompare;
+
 class PartitionIteratorScatter
 {
+ public:
+  static constexpr int total_loop_count_limit = 100;
+
  private:
+  friend struct SetIteratorCompare;
+  struct SetIterator
+  {
+    PairTripletIteratorScatter m_pair_triplet_iterator;
+    SetIndex m_set_index;
+    int m_loop_count;
+
+    SetIterator(PartitionTask const& partition_task, Set set, SetIndex set_index, int loop_count) :
+      m_pair_triplet_iterator(partition_task, set), m_set_index(set_index), m_loop_count(loop_count) { }
+
+    void reset()
+    {
+      m_pair_triplet_iterator.reset();
+    }
+
+    void print_on(std::ostream& os) const;
+  };
+
   Partition m_orig;
-  std::vector<std::pair<SetIteratorScatter, SetIndex>> m_set_iterators;
+  std::vector<SetIterator> m_pair_triplet_iterators;
+  MultiLoop m_pair_triplet_counters;
+
+ private:
+  bool increase_loop_count();
 
  public:
   // Create an end iterator.
-  PartitionIteratorScatter() { }
+  PartitionIteratorScatter() : m_orig(0) { }
   // Create the begin iterator.
-  PartitionIteratorScatter(Partition orig);
+  PartitionIteratorScatter(PartitionTask const& partition_task, Partition orig);
 
   PartitionIteratorScatter& operator++();
 
   bool is_end() const
   {
-    return m_set_iterators.empty();
+    return m_pair_triplet_counters.finished();
   }
 
   Partition operator*() const;
+
+  void print_on(std::ostream& os) const;
 };

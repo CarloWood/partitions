@@ -13,6 +13,7 @@ class PartitionTask
   static std::array<std::array<partition_count_t, max_number_of_elements * (max_number_of_elements + 1) / 2>, max_number_of_elements> s_table3d;
 
   int m_number_of_elements;
+  utils::RandomNumber m_random_number;
   std::map<Set, Score> m_set23_to_score;        // Initialized by initialize_set23_to_score.
   bool m_set23_to_score_initialized{false};     // Set to true when m_set23_to_score is initialized.
   std::vector<Score> m_scores;
@@ -25,6 +26,21 @@ class PartitionTask
   static int table(int top_sets, int depth, int sets);
   static partition_count_t number_of_partitions(int top_sets, int depth);
   static void print_table(int top_sets);
+
+  Score score(Set set23) const
+  {
+    auto set23_iter = m_set23_to_score.find(set23);
+    if (set23_iter == m_set23_to_score.end())
+      return {};
+    return set23_iter->second;
+  }
+
+  Partition random();
+
+  int number_of_elements() const
+  {
+    return m_number_of_elements;
+  }
 
   ElementIndex ibegin() const
   {
