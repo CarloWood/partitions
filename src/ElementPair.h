@@ -2,6 +2,9 @@
 
 #include "Element.h"
 #include "Score.h"
+#include "debug.h"
+
+class PartitionTask;
 
 class ElementPair
 {
@@ -12,15 +15,12 @@ class ElementPair
  public:
   // Construct an undefined element pair.
   ElementPair() = default;
-  constexpr ElementPair(ElementIndex element1, ElementIndex element2) : m_element1(element1), m_element2(element2)
+  ElementPair(ElementIndex element1, ElementIndex element2) : m_element1(element1), m_element2(element2)
   {
-    X_ASSERT(element1 != element2);
+    ASSERT(element1 != element2);
   }
 
-  Score const& score()
-  {
-    return g_scores[score_index()];
-  }
+  Score const& score(PartitionTask const& partition_task) const;
 
   int score_index() const
   {

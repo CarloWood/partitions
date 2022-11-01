@@ -2,51 +2,8 @@
 #include "SetIteratorScatter.h"
 #include "ElementPair.h"
 
-//static
-void SetIteratorScatter::initialize()
-{
-  for (ElementIndex i1 = Element::ibegin(); i1 != Element::iend(); ++i1)
-  {
-    for (ElementIndex i2 = i1 + 1; i2 != Element::iend(); ++i2)
-    {
-      ElementPair ep(i1, i2);
-      int score_index = ep.score_index();
-      Score const score = g_scores[score_index];
-      Score zero;
-      //Dout(dc::notice, "ep = " << ep << "; score = " << score << "; zero < score = " << std::boolalpha << (zero < score));
-      if (zero < score)
-        s_set23_to_score[Set(Element{i1}|Element{i2})] = score;
-      for (ElementIndex i3 = i2 + 1; i3 != Element::iend(); ++i3)
-      {
-        ElementPair ep13(i1, i3);
-        ElementPair ep23(i2, i3);
-        int score_index13 = ep13.score_index();
-        int score_index23 = ep23.score_index();
-        Score score13 = g_scores[score_index13];
-        Score score23 = g_scores[score_index23];
-        Score score3 = score;
-        score3 += score13;
-        score3 += score23;
-        if (zero < score3)
-          s_set23_to_score[Set(Element{i1}|Element{i2}|Element{i3})] = score3;
-      }
-    }
-  }
-//  for (auto p : s_set23_to_score)
-//    s_scores23.insert(std::make_pair(p.second, p.first));
-
-//  for (auto s : s_scores23)
-//    std::cout << s << '\n';
-}
-
-//static
-std::map<Set, Score> SetIteratorScatter::s_set23_to_score;
-//std::multimap<Score, Set> SetIteratorScatter::s_scores23;
-std::once_flag SetIteratorScatter::s_initialize_flag;
-
 SetIteratorScatter::SetIteratorScatter(Set orig) : m_orig(orig), m_method_A(std::make_shared<method_A_container_t>())
 {
-  std::call_once(s_initialize_flag, SetIteratorScatter::initialize);
   int orig_element_count = m_orig.element_count();
   // Don't try to iterate over a set that has less than 3 elements.
   ASSERT(orig_element_count > 2);
@@ -99,11 +56,6 @@ Score SetIteratorScatter::score_difference() const
   return score - next_score;
 }
 
-  Set m_orig;
-  using method_A_container_t = std::multimap<Score, Set, std::greater<Score>>;
-  std::shared_ptr<method_A_container_t> m_method_A;
-  method_A_container_t::const_iterator m_current_A;
-
 void SetIteratorScatter::print_on(std::ostream& os) const
 {
   os << '{';
@@ -113,3 +65,6 @@ void SetIteratorScatter::print_on(std::ostream& os) const
   os << "  m_current_A = " << *m_current_A << '\n';
   os << '}';
 }
+
+//static
+std::map<Set, Score> SetIteratorScatter::s_set23_to_score;

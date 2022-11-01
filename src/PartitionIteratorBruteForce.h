@@ -7,14 +7,14 @@
 class PartitionIteratorBruteForce
 {
  private:
-  MultiLoop m_multiloop{number_of_elements};
-  std::array<int, number_of_elements> m_loop_value_count;       // The number of loop counter with a value equal to the index.
+  MultiLoop m_multiloop;
+  std::vector<int> m_loop_value_count;       // The number of loop counter with a value equal to the index.
 
  public:
   // Create an end iterator.
-  PartitionIteratorBruteForce() : m_multiloop(number_of_elements, 1) { }
+  PartitionIteratorBruteForce() : m_multiloop(1, 1) { }
   // Create the begin iterator.
-  PartitionIteratorBruteForce(int);
+  PartitionIteratorBruteForce(int number_of_elements);
 
   PartitionIteratorBruteForce& operator++();
 

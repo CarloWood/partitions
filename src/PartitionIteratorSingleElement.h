@@ -6,17 +6,17 @@ class PartitionIteratorSingleElement final : public PartitionIteratorBase
 {
  private:
   // Second loop variable.
-  ElementIndex m_current_element_index{Element::ibegin()};      // 0...N-1
+  ElementIndex m_current_element_index{utils::bitset::index_begin};      // 0...N-1
   // Cached information about the current element.
   bool m_current_element_is_alone{};            // Whether or not it is the only elment in that set (in the original).
 
  public:
   // Create an end iterator.
-  PartitionIteratorSingleElement() : m_current_element_index(Element::ibegin()) { }
+  PartitionIteratorSingleElement() : m_current_element_index{utils::bitset::index_pre_begin} { }
 
   // Create a begin iterator.
   PartitionIteratorSingleElement(Partition const& orig) :
-    PartitionIteratorBase(orig, orig.set_of(Element::ibegin())),
+    PartitionIteratorBase(orig, orig.set_of(utils::bitset::index_begin)),
     m_current_element_is_alone(orig.is_alone(m_current_element_index))
   {
   }

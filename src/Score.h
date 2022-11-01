@@ -97,5 +97,3 @@ class Score
 
   void print_on(std::ostream& os) const;
 };
-
-extern std::vector<Score> g_scores;

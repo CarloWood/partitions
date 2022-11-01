@@ -16,17 +16,24 @@ class PartitionIteratorBase
 
  public:
   // Construct the 'end' iterator.
-  PartitionIteratorBase() : m_to_set{} { }
+  PartitionIteratorBase() : m_original_partition(0), m_to_set{} { }
 
   PartitionIteratorBase(Partition const& orig, SetIndex from_set_index) :
     m_original_partition(orig),
     m_number_of_sets_original(orig.number_of_sets()),
-    m_from_set(from_set_index) { }
+    m_from_set(from_set_index)
+  {
+//  DoutEntering(dc::notice, "PartitionIteratorBase::PartitionIteratorBase(" << orig << ", " << from_set_index << ")");
+    ASSERT(!m_from_set.undefined());
+  }
 
   Partition const& original_partition() const
   {
     return m_original_partition;
   }
+
+  ElementIndex element_ibegin() const { return m_original_partition.element_ibegin(); }
+  ElementIndex element_iend() const { return m_original_partition.element_iend(); }
 
   SetIndex from_set() const
   {
@@ -57,6 +64,8 @@ class PartitionIteratorBase
  virtual void increment() = 0;
  virtual Set moved_elements() const = 0;
  virtual bool unequal(PartitionIteratorBase const& rhs) const = 0;
+
+ void print_on(std::ostream&) const;
 };
 
 #endif // PARTITION_ITERATOR_BASE

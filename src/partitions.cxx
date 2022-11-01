@@ -2,6 +2,7 @@
 #include "ElementPair.h"
 #include "Partition.h"
 #include "PartitionIteratorScatter.h"
+#include "PartitionTask.h"
 #include "SetIteratorScatter.h"
 #include "utils/MultiLoop.h"
 #include "utils/debug_ostream_operators.h"
@@ -17,6 +18,8 @@
 #include <cmath>
 #include "debug.h"
 
+constexpr int number_of_elements2 = 6;
+
 std::array<Score, 8> g_possible_scores = {
   negative_inf,
   -100,
@@ -30,12 +33,12 @@ std::array<Score, 8> g_possible_scores = {
 
 std::array<int, 8> frequency = {
   1,
-  number_of_elements,
-  number_of_elements,
-  number_of_elements,
-  number_of_elements,
-  number_of_elements,
-  number_of_elements,
+  number_of_elements2,
+  number_of_elements2,
+  number_of_elements2,
+  number_of_elements2,
+  number_of_elements2,
+  number_of_elements2,
   1
 };
 
@@ -45,11 +48,11 @@ Element const C{'C'};
 Element const D{'D'};
 Element const E{'E'};
 Element const F{'F'};
+#if 0
 Element const G{'G'};
 Element const H{'H'};
 Element const I{'I'};
 Element const J{'J'};
-#if 0
 Element const K{'K'};
 Element const L{'L'};
 Element const M{'M'};
@@ -79,27 +82,29 @@ int main()
     possible_scores_index_from_distribution.push_back(j);
   }
 
-  utils::RandomNumber random_number(0x5ebf860a924ad);
+  utils::RandomNumber random_number(0x5ec5853653bbd);
   std::uniform_int_distribution<int> distribution(0, frequency_sum - 1);
+
+  PartitionTask partition_task(number_of_elements2);
 
   char const* sep = "    ";
   std::cout << "    ";
-  for (ElementIndex i1 = Element::ibegin(); i1 != Element::iend(); ++i1)
+  for (ElementIndex i1 = partition_task.ibegin(); i1 != partition_task.iend(); ++i1)
     std::cout << sep << Element(i1);
   std::cout << '\n';
   std::string indent("    ");
-  for (ElementIndex i1 = Element::ibegin(); i1 != Element::iend(); ++i1)
+  for (ElementIndex i1 = partition_task.ibegin(); i1 != partition_task.iend(); ++i1)
   {
     std::cout << "    " << Element(i1) << indent;
     char const* prefix = "";
-    for (ElementIndex i2 = i1 + 1; i2 != Element::iend(); ++i2)
+    for (ElementIndex i2 = i1 + 1; i2 != partition_task.iend(); ++i2)
     {
       ElementPair ep(i1, i2);
       int score_index = ep.score_index();
-      if (g_scores[score_index].is_zero())
-        g_scores[score_index] = g_possible_scores[possible_scores_index_from_distribution[random_number.generate(distribution)]];
+      if (partition_task.score(score_index).is_zero())
+        partition_task.set_score(score_index, g_possible_scores[possible_scores_index_from_distribution[random_number.generate(distribution)]]);
 
-      std::cout << std::setw(5) << ep.score();
+      std::cout << std::setw(5) << ep.score(partition_task);
       //std::cout << ep << " : " << score(ep) << '\n';
     }
     std::cout << '\n';
@@ -107,18 +112,28 @@ int main()
     indent += ' ';
   }
 
+  partition_task.initialize_set23_to_score();
+
   Score max_score(negative_inf);
   std::map<Partition, int> results;
-  for (int rp = 0; rp < 1000; ++rp)
+  for (int rp = 0; rp < 100; ++rp)
   {
-    Partition partition = Partition::random();
-    Score score = partition.find_local_maximum();
-    //std::cout << score << " : " << partition << '\n';
+    utils::Array<Set, max_number_of_elements, SetIndex> a = {
+      Set{A|D|F},
+      Set{B|C|E},
+    };
+    Partition partition(ElementIndex{ElementIndexPOD{6}}, a); // = Partition::random(number_of_elements2);
+    //Partition partition = Partition::random(number_of_elements2);
+    Score score = partition.find_local_maximum(partition_task);
+    std::cout << " = " << score << std::endl;
     int count = 0;
     for (PartitionIteratorScatter scatter = partition.sbegin(); !scatter.is_end(); ++scatter)
     {
+      Dout(dc::notice, "scatter = " << scatter);
       Partition partition2 = *scatter;
-      Score score2 = partition2.find_local_maximum();
+      Dout(dc::notice, "partition2 = " << partition2);
+      Score score2 = partition2.find_local_maximum(partition_task);
+      Dout(dc::notice, "partition2 = " << partition2 << " = " << score2);
       if (score2 > score)
       {
         partition = partition2;
@@ -134,7 +149,7 @@ int main()
   }
   std::multimap<Score, std::map<Partition, int>::iterator> score_to_partition;
   for (auto ri = results.begin(); ri != results.end(); ++ri)
-    score_to_partition.insert(std::make_pair(ri->first.score(), ri));
+    score_to_partition.insert(std::make_pair(ri->first.score(partition_task), ri));
   for (auto spi = score_to_partition.begin(); spi != score_to_partition.end(); ++spi)
     std::cout << spi->first << " : " << spi->second->first << " : " << spi->second->second << '\n';
   std::cout << "Maximum score = " << max_score << '\n';

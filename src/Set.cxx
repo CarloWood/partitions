@@ -1,10 +1,11 @@
 #include "sys.h"
 #include "Set.h"
 #include "ElementPair.h"
+#include "PartitionTask.h"
 #include <iostream>
 #include <vector>
 
-Score Set::score() const
+Score Set::score(PartitionTask const& partition_task) const
 {
   Score sum;
   if (m_elements.any() && !m_elements.is_single_bit())
@@ -16,7 +17,7 @@ Score Set::score() const
       while (bit_iter2 != m_elements.end())
       {
         int score_index = ElementPair{elements_t::mask2index((*bit_iter1)()), elements_t::mask2index((*bit_iter2)())}.score_index();
-        sum += g_scores[score_index];
+        sum += partition_task.score(score_index);
         ++bit_iter2;
       }
     }
@@ -27,10 +28,14 @@ Score Set::score() const
 void Set::print_on(std::ostream& os) const
 {
   os << '{';
-  for (ElementIndex i = Element::ibegin(); i != Element::iend(); ++i)
+  ElementIndex const last_element_index = m_elements.mssbi();
+  ElementIndex element_index = m_elements.lssbi();
+  while (element_index <= last_element_index)
   {
-    if (m_elements.test(Element{i}))
-      os << Element{i};
+    Element element{element_index};
+    if (m_elements.test(element))
+      os << element;
+    ++element_index;
   }
   os << '}';
 }

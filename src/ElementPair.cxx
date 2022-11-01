@@ -1,6 +1,12 @@
 #include "sys.h"
 #include "ElementPair.h"
+#include "PartitionTask.h"
 #include <iostream>
+
+Score const& ElementPair::score(PartitionTask const& partition_task) const
+{
+  return partition_task.score(score_index());
+}
 
 void ElementPair::print_on(std::ostream& os) const
 {

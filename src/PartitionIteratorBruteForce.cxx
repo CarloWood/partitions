@@ -1,7 +1,7 @@
 #include "sys.h"
 #include "PartitionIteratorBruteForce.h"
 
-PartitionIteratorBruteForce::PartitionIteratorBruteForce(int) : m_multiloop(number_of_elements), m_loop_value_count{}
+PartitionIteratorBruteForce::PartitionIteratorBruteForce(int number_of_elements) : m_multiloop(number_of_elements), m_loop_value_count(number_of_elements)
 {
   for (; !m_multiloop.finished(); m_multiloop.next_loop())
   {
@@ -44,10 +44,11 @@ PartitionIteratorBruteForce& PartitionIteratorBruteForce::operator++()
 
 Partition PartitionIteratorBruteForce::operator*() const
 {
-  utils::Array<Set, number_of_elements, SetIndex> sets;
+  utils::Array<Set, max_number_of_elements, SetIndex> sets;
   for (SetIndex g = sets.ibegin(); g != sets.iend(); ++g)
-    sets[g] = Set{elements_t{0}};
-  for (ElementIndex l{Element::s_ibegin}; l < Element::s_iend; ++l)
+    sets[g].clear();
+  ElementIndex const number_of_elements{ElementIndexPOD{static_cast<int8_t>(m_loop_value_count.size())}};
+  for (ElementIndex l{utils::bitset::index_begin}; l < number_of_elements; ++l)
     sets[SetIndex{m_multiloop[l()]}].add(Element{l});
-  return {sets};
+  return {number_of_elements, sets};
 }

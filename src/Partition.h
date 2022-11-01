@@ -3,7 +3,7 @@
 
 #include "Element.h"
 #include "Set.h"
-#include "utils/Array.h"
+#include "utils/Vector.h"
 #include "utils/RandomNumber.h"
 #include <iosfwd>
 #include <algorithm>
@@ -11,25 +11,22 @@
 class PartitionIterator;
 class PartitionIteratorBruteForce;
 class PartitionIteratorScatter;
+class PartitionTask;
 
 class Partition
 {
  private:
   friend class PartitionIterator;
-  utils::Array<Set, number_of_elements, SetIndex> m_sets;
+  utils::Vector<Set, SetIndex> m_sets;
 
  public:
-  Partition();
-
-  template<ConceptSet... GROUP>
-  Partition(GROUP... sets) : m_sets{sets...}
+  Partition(int number_of_elements);
+  Partition(int number_of_elements, Set set) : m_sets(number_of_elements) { *m_sets.begin() = set; }
+  Partition(ElementIndex number_of_elements, utils::Array<Set, max_number_of_elements, SetIndex> const& sets) :
+    m_sets(sets.begin(), sets.begin() + number_of_elements())
   {
-    for (SetIndex gi{sizeof...(sets)}; gi != m_sets.iend(); ++gi)
-      m_sets[gi] = Set{elements_t{elements_t::mask_type{0}}};
     sort();
   }
-
-  Partition(utils::Array<Set, number_of_elements, SetIndex> const& sets) : m_sets(sets) { sort(); }
 
   void print_sets() const;
   void print_on(std::ostream& os) const;
@@ -39,28 +36,28 @@ class Partition
     return m_sets[set_index];
   }
 
-  auto gbegin() const { return m_sets.ibegin(); }
-  auto gend() const { return m_sets.iend(); }
+  ElementIndex element_ibegin() const { return {utils::bitset::index_begin}; }
+  ElementIndex element_iend() const { return ElementIndexPOD{static_cast<int8_t>(m_sets.size())}; }
+
+  SetIndex set_ibegin() const { return m_sets.ibegin(); }
+  SetIndex set_iend() const { return m_sets.iend(); }
 
   template<typename Algorithm>
   PartitionIterator begin() const;
 
   PartitionIterator end() const;
 
-  static PartitionIteratorBruteForce bbegin();
-  static PartitionIteratorBruteForce bend();
-
   PartitionIteratorScatter sbegin();
   PartitionIteratorScatter send();
 
   static utils::RandomNumber s_random_number;
-  static Partition random();
+  static Partition random(int number_of_elements);
 
   SetIndex number_of_sets() const;
   bool is_alone(Element element) const;
   SetIndex set_of(Element element) const;
   SetIndex first_empty_set() const;
-  Score score() const;
+  Score score(PartitionTask const& partition_task) const;
 
   void sort()
   {
@@ -77,7 +74,7 @@ class Partition
     m_sets[set_index].remove(set);
   }
 
-  Score find_local_maximum();
+  Score find_local_maximum(PartitionTask const& partition_task);
 
   friend bool operator<(Partition const& lhs, Partition const& rhs)
   {

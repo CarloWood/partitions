@@ -22,6 +22,8 @@ class PartitionIterator
   Partition operator*() const;
   PartitionIterator& operator++();
   friend bool operator!=(PartitionIterator const& lhs, PartitionIterator const& rhs);
+
+  void print_on(std::ostream& os) const;
 };
 
 #endif // PARTITION_ITERATOR_H

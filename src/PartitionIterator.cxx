@@ -46,3 +46,11 @@ bool operator!=(PartitionIterator const& lhs, PartitionIterator const& rhs)
   bool rhs_is_end = !rhs.m_base || rhs.m_base->is_end();
   return lhs_is_end != rhs_is_end;
 }
+
+void PartitionIterator::print_on(std::ostream& os) const
+{
+  if (m_base)
+    os << "{m_base:@" << *m_base << "}";
+  else
+    os << "{m_base:nullptr}";
+}

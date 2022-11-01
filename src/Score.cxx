@@ -19,7 +19,3 @@ void Score::print_on(std::ostream& os) const
       os << " - inf * " << m_number_of_negative_inf;
   }
 }
-
-// See ElementPair::score_index().
-constexpr int scores_size = 64 * (number_of_elements - 1) + number_of_elements;
-std::vector<Score> g_scores(scores_size);

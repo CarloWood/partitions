@@ -23,12 +23,9 @@ class SetIteratorScatter
 {
  private:
   static std::map<Set, Score> s_set23_to_score;     // Required for method A.
-//  static std::multimap<Score, Set> s_scores23;        // Required for method B.
   static std::once_flag s_initialize_flag;
 
   Set m_orig;
-//  bool m_use_method_B;  // False: generate all results in advance and then sort them.
-                        // True: run over all possible pairs/triplets in order of score.
   using method_A_container_t = std::multimap<Score, Set, std::greater<Score>>;
   std::shared_ptr<method_A_container_t> m_method_A;
   method_A_container_t::const_iterator m_current_A;

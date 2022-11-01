@@ -11,6 +11,8 @@
 class Set;
 using SetIndex = utils::ArrayIndex<Set>;
 
+class PartitionTask;
+
 class Set
 {
  private:
@@ -71,7 +73,7 @@ class Set
     return m_elements.count();
   }
 
-  Score score() const;
+  Score score(PartitionTask const& partition_task) const;
 
   friend bool operator<(Set lhs, Set rhs)
   {
