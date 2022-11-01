@@ -21,12 +21,17 @@ class Partition
 
  public:
   Partition(int number_of_elements);
-  Partition(int number_of_elements, Set set) : m_sets(number_of_elements) { *m_sets.begin() = set; }
+  Partition(int number_of_elements, Set set) : m_sets(number_of_elements)
+  {
+    auto set_iter = m_sets.begin();
+    *set_iter = set;
+    while (++set_iter != m_sets.end())
+      set_iter->clear();
+  }
+  // Only used by PartitionIteratorBruteForce.
   Partition(ElementIndex number_of_elements, utils::Array<Set, max_number_of_elements, SetIndex> const& sets) :
     m_sets(sets.begin(), sets.begin() + number_of_elements())
   {
-    //FIXME: remove this. Do we ever get here?
-    ASSERT(false);
     sort();
   }
 

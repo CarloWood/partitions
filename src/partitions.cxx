@@ -18,7 +18,7 @@
 #include <cmath>
 #include "debug.h"
 
-constexpr int number_of_elements = 3;
+constexpr int number_of_elements = 64;
 
 std::array<Score, 8> g_possible_scores = {
   negative_inf,
