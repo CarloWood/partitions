@@ -9,10 +9,28 @@
 #include <iostream>
 #include <iomanip>
 
-Partition::Partition(int number_of_elements) : m_sets(number_of_elements)
+Partition::Partition(PartitionTask const& partition_task) :
+  m_sets(partition_task.max_number_of_sets()), m_number_of_elements(partition_task.number_of_elements())
 {
   for (auto i = m_sets.ibegin(); i != m_sets.iend(); ++i)
-    m_sets[i] = Element{static_cast<char>('A' - (number_of_elements - 1 - i.get_value()))};
+    m_sets[i].clear();
+
+  for (ElementIndexPOD element_index{0}; element_index.m_index < m_number_of_elements; ++element_index.m_index)
+  {
+    SetIndex set_index{element_index.m_index % partition_task.max_number_of_sets()};
+    m_sets[set_index].add(Set(element_index));
+  }
+
+  sort();
+}
+
+Partition::Partition(PartitionTask const& partition_task, Set set) :
+  m_sets(partition_task.max_number_of_sets()), m_number_of_elements(partition_task.number_of_elements())
+{
+  auto set_iter = m_sets.begin();
+  *set_iter = set;
+  while (++set_iter != m_sets.end())
+    set_iter->clear();
 }
 
 PartitionIterator Partition::end() const

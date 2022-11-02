@@ -18,19 +18,16 @@ class Partition
  private:
   friend class PartitionIterator;
   utils::Vector<Set, SetIndex> m_sets;
+  int8_t m_number_of_elements{};
 
  public:
-  Partition(int number_of_elements);
-  Partition(int number_of_elements, Set set) : m_sets(number_of_elements)
-  {
-    auto set_iter = m_sets.begin();
-    *set_iter = set;
-    while (++set_iter != m_sets.end())
-      set_iter->clear();
-  }
+  Partition() = default;
+  Partition(PartitionTask const& partition_task);
+  Partition(PartitionTask const& partition_task, Set set);
+
   // Only used by PartitionIteratorBruteForce.
   Partition(ElementIndex number_of_elements, utils::Array<Set, max_number_of_elements, SetIndex> const& sets) :
-    m_sets(sets.begin(), sets.begin() + number_of_elements())
+    m_sets(sets.begin(), sets.begin() + number_of_elements()), m_number_of_elements(number_of_elements())
   {
     sort();
   }
@@ -44,7 +41,7 @@ class Partition
   }
 
   ElementIndex element_ibegin() const { return {utils::bitset::index_begin}; }
-  ElementIndex element_iend() const { return ElementIndexPOD{static_cast<int8_t>(m_sets.size())}; }
+  ElementIndex element_iend() const { return ElementIndexPOD{m_number_of_elements}; }
 
   SetIndex set_ibegin() const { return m_sets.ibegin(); }
   SetIndex set_iend() const { return m_sets.iend(); }

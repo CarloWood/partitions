@@ -5,7 +5,8 @@ void PartitionIteratorSingleElement::increment()
 {
   do
   {
-    if (++m_to_set == (m_current_element_is_alone ? m_number_of_sets_original - 1 : m_number_of_sets_original + 1))
+    if (++m_to_set == (m_current_element_is_alone ? m_number_of_sets_original - 1 : m_number_of_sets_original + 1) ||
+        m_to_set == m_original_partition.set_iend())
     {
       m_to_set.set_to_zero();
       if (++m_current_element_index == m_original_partition.element_iend())

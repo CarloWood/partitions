@@ -5,11 +5,11 @@ void PartitionIteratorWholeSet::increment()
 {
   do
   {
-    // Increment the inner loop variable until it points to the first empty set.
+    // Increment the inner loop variable until it points to the first empty set, which might be one beyond the end of the vector.
     if (++m_from_set == m_first_empty_set)
     {
-      // Increment the outer loop variable, but do not move into m_first_empty_set or passed the actual end of the vector.
-      if (m_to_set == m_first_empty_set - 1 || ++m_to_set == m_original_partition.set_iend())
+      // Increment the outer loop variable.
+      if (++m_to_set == m_first_empty_set)
       {
         // We reached the end.
         set_to_end();

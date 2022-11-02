@@ -12,15 +12,19 @@ class PartitionTask
   //FIXME: can't this be a temporary?
   static std::array<std::array<partition_count_t, max_number_of_elements * (max_number_of_elements + 1) / 2>, max_number_of_elements> s_table3d;
 
-  int m_number_of_elements;
-  utils::RandomNumber m_random_number;
+  int8_t m_number_of_elements;                  // The number of elements that we need to partition.
+  int8_t m_max_number_of_sets;                  // The maximum number of sets that will be used by this task.
+  utils::RandomNumber m_random_number{0x5ec7ec5e39c65};
   std::map<Set, Score> m_set23_to_score;        // Initialized by initialize_set23_to_score.
   bool m_set23_to_score_initialized{false};     // Set to true when m_set23_to_score is initialized.
   std::vector<Score> m_scores;
 
  public:
-  PartitionTask(int number_of_elements) :
-    m_number_of_elements(number_of_elements), m_scores(64 * (number_of_elements - 1) + number_of_elements) { }
+  PartitionTask(int8_t number_of_elements, int8_t max_number_of_sets) :
+    m_number_of_elements(number_of_elements),
+    m_max_number_of_sets(std::min(number_of_elements, max_number_of_sets)),
+    m_scores(64 * (number_of_elements - 1) + number_of_elements)
+  { }
 
   static partition_count_t& number_of_partitions(int top_sets, int depth, int sets);
   static int table(int top_sets, int depth, int sets);
@@ -37,9 +41,14 @@ class PartitionTask
 
   Partition random();
 
-  int number_of_elements() const
+  int8_t number_of_elements() const
   {
     return m_number_of_elements;
+  }
+
+  int max_number_of_sets() const
+  {
+    return m_max_number_of_sets;
   }
 
   ElementIndex ibegin() const
@@ -49,7 +58,7 @@ class PartitionTask
 
   ElementIndex iend() const
   {
-    return ElementIndexPOD{static_cast<int8_t>(m_number_of_elements)};
+    return ElementIndexPOD{m_number_of_elements};
   }
 
   PartitionIteratorBruteForce bbegin()

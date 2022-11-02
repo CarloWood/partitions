@@ -18,7 +18,8 @@
 #include <cmath>
 #include "debug.h"
 
-constexpr int number_of_elements = 64;
+constexpr int8_t number_of_elements = 26;
+constexpr int8_t max_number_of_sets = 4;
 
 std::array<Score, 8> g_possible_scores = {
   negative_inf,
@@ -36,9 +37,9 @@ std::array<int, 8> frequency = {
   number_of_elements,
   number_of_elements,
   number_of_elements,
-  number_of_elements,
-  number_of_elements,
-  number_of_elements,
+  10,
+  10,
+  10,
   1
 };
 
@@ -85,7 +86,7 @@ int main()
   utils::RandomNumber random_number(0x5ec5853653bbd);
   std::uniform_int_distribution<int> distribution(0, frequency_sum - 1);
 
-  PartitionTask partition_task(number_of_elements);
+  PartitionTask partition_task(number_of_elements, max_number_of_sets);
 
   char const* sep = "    ";
   std::cout << "    ";

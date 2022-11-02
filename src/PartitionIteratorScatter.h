@@ -75,7 +75,7 @@ class PartitionIteratorScatter
 
  public:
   // Create an end iterator.
-  PartitionIteratorScatter() : m_orig(0) { }
+  PartitionIteratorScatter() = default;
   // Create the begin iterator.
   PartitionIteratorScatter(PartitionTask const& partition_task, Partition orig);
 

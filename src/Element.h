@@ -7,7 +7,7 @@
 using utils::has_print_on::operator<<;
 
 using elements_t = utils::BitSet<uint64_t>;
-constexpr int max_number_of_elements = 8 * sizeof(elements_t::mask_type);
+constexpr int8_t max_number_of_elements = 8 * sizeof(elements_t::mask_type);
 
 class Element;
 using ElementIndex = elements_t::Index;

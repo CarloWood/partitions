@@ -16,7 +16,7 @@ class PartitionIteratorBase
 
  public:
   // Construct the 'end' iterator.
-  PartitionIteratorBase() : m_original_partition(0), m_to_set{} { }
+  PartitionIteratorBase() : m_to_set{} { }
 
   PartitionIteratorBase(Partition const& orig, SetIndex from_set_index) :
     m_original_partition(orig),

@@ -76,7 +76,7 @@ int PartitionTask::table(int top_sets, int depth, int sets)
 PartitionTask::partition_count_t PartitionTask::number_of_partitions(int top_sets, int depth)
 {
   partition_count_t sum = 0;
-  for (int sets = top_sets; sets <= max_number_of_elements; ++sets)
+  for (int8_t sets = top_sets; sets <= max_number_of_elements; ++sets)
   {
     partition_count_t term = table(top_sets, depth, sets);
     if (term == 0)
@@ -91,15 +91,15 @@ PartitionTask::partition_count_t PartitionTask::number_of_partitions(int top_set
 void PartitionTask::print_table(int top_sets)
 {
   std::cout << "  ";
-  for (int sets = 1; sets <= max_number_of_elements; ++sets)
+  for (int8_t sets = 1; sets <= max_number_of_elements; ++sets)
   {
     std::cout << std::setw(8) << sets;
   }
   std::cout << '\n';
-  for (int depth = 0; depth <= max_number_of_elements - top_sets; ++depth)
+  for (int8_t depth = 0; depth <= max_number_of_elements - top_sets; ++depth)
   {
     std::cout << std::setw(2) << depth;
-    for (int sets = 1; sets <= max_number_of_elements; ++sets)
+    for (int8_t sets = 1; sets <= max_number_of_elements; ++sets)
     {
       int v = table(top_sets, depth, sets);
       std::cout << std::setw(8) << v;
@@ -145,13 +145,13 @@ void PartitionTask::initialize_set23_to_score()
 
 Partition PartitionTask::random()
 {
-  Partition top(m_number_of_elements, Set(Element('A')));
-  int top_sets = 1;   // The current_root has 1 set.
-  int top_elements = 1; // The current_root has 1 element.
+  Partition top(*this, Set(Element('A')));
+  int8_t top_sets = 1;     // The current_root has 1 set.
+  int8_t top_elements = 1; // The current_root has 1 element.
   while (top_elements < m_number_of_elements)
   {
     Element const new_element('A' + top_elements);
-    int depth = m_number_of_elements - top_elements;
+    int8_t depth = m_number_of_elements - top_elements;
     partition_count_t existing_set = PartitionTask::number_of_partitions(top_sets, depth - 1);
     partition_count_t new_set = PartitionTask::number_of_partitions(top_sets + 1, depth - 1);
     partition_count_t total = top_sets * existing_set + new_set;

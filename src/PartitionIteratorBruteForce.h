@@ -14,7 +14,7 @@ class PartitionIteratorBruteForce
   // Create an end iterator.
   PartitionIteratorBruteForce() : m_multiloop(1, 1) { }
   // Create the begin iterator.
-  PartitionIteratorBruteForce(int number_of_elements);
+  PartitionIteratorBruteForce(int8_t number_of_elements);
 
   PartitionIteratorBruteForce& operator++();
 

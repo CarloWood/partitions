@@ -15,13 +15,14 @@ PartitionIteratorScatter::PartitionIteratorScatter(PartitionTask const& partitio
 //  DoutEntering(dc::notice, "PartitionIteratorScatter::PartitionIteratorScatter(" << orig << ")");
   for (SetIndex set_index = m_orig.set_ibegin(); set_index != m_orig.set_iend(); ++set_index)
   {
-    Set pair_triplet = m_orig.set(set_index);
+    Set set = m_orig.set(set_index);
     int element_count = pair_triplet.element_count();
     if (element_count == 0)
       break;
     if (element_count > 2)
-      m_pair_triplet_iterators.emplace_back(partition_task, pair_triplet, set_index, 1);
+      m_pair_triplet_iterators.emplace_back(partition_task, set, set_index, 1);
   }
+  // Start m_pair_triplet_iterators.size() nested for loops, all beginning at 0.
   m_pair_triplet_counters.initialize(m_pair_triplet_iterators.size(), 0);
   if (m_pair_triplet_iterators.empty())
     return;

@@ -1,7 +1,7 @@
 #include "sys.h"
 #include "PartitionIteratorBruteForce.h"
 
-PartitionIteratorBruteForce::PartitionIteratorBruteForce(int number_of_elements) : m_multiloop(number_of_elements), m_loop_value_count(number_of_elements)
+PartitionIteratorBruteForce::PartitionIteratorBruteForce(int8_t number_of_elements) : m_multiloop(number_of_elements), m_loop_value_count(number_of_elements)
 {
   for (; !m_multiloop.finished(); m_multiloop.next_loop())
   {
