@@ -86,7 +86,12 @@ int main()
   utils::RandomNumber random_number(0x5ec5853653bbd);
   std::uniform_int_distribution<int> distribution(0, frequency_sum - 1);
 
-  PartitionTask partition_task(number_of_elements, max_number_of_sets);
+  //PartitionTask partition_task(number_of_elements, max_number_of_sets);
+  PartitionTask partition_task(4, 2);
+
+  for (int i = 0; i < 10000000; ++i)
+    Dout(dc::notice, partition_task.random());
+  return 0;
 
   char const* sep = "    ";
   std::cout << "    ";

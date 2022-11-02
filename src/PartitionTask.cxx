@@ -4,30 +4,35 @@
 #include <iomanip>
 
 #if 0
-
                                              {A}
                {AB}                                                            {A,B}
     {ABC}                {AB,C}          |          {AC,B}                     {A,BC}                          {A,B,C}
-{ABCD} {ABC,D} | {ABD,C} {AB,CD} {AB,C,D} | {ACD,B} {AC,BD} {AC,B,D} | {AD,BC} {A,BCD} {A,BC,D} | {AD,B,C} {A,BD,C} {A,B,CD} {A,B,C,D}
+{ABCD}  {ABC,D} | {ABD,C}  {AB,CD}  {AB,C,D} | {ACD,B}  {AC,BD}  {AC,B,D} | {AD,BC}  {A,BCD}  {A,BC,D} | {AD,B,C}  {A,BD,C}  {A,B,CD}{A,B,C,D}
 
-Table "1"
+
+{ABCDE} {ABCE,D}  {ABDE,C} {ABE,CD} {ABE,C,D} |{ACDE,B} {ACE,BD} {ACE,B,D} |{ADE,BC} {AE,BCD} {AE,BC,D} |{ADE,B,C} {AE,BD,C} {A,B,CD}{AE,B,C,D}
+{ABCD,E}{ABC,DE}  {ABD,CE} {AB,CDE} {AB,CE,D} |{ACD,BE} {AC,BDE} {AC,BE,D} |{AD,BCE} {A,BCDE} {A,BCE,D} |{AD,BE,C} {A,BDE,C} {A,B,CD}{A,BE,C,D}
+        {ABC,D,E} {ABD,C,E}{AB,CD,E}{AB,C,DE} |{ACD,B,E}{AC,BD,E}{AC,B,DE} |{AD,BC,E}{A,BCD,E}{A,BC,DE} |{AD,B,CE} {A,BD,CE} {A,B,CD}{A,B,CE,D}
+                                    {AB,C,D,E}|                  {AC,B,D,E}|                  {A,BC,D,E}|{AD,B,C,E}{A,BD,C,E}{A,B,CD}{A,B,C,DE}
+                                                                                                                                     {A,B,C,D,E}
+Table "top_sets = 1" - starting with a partition with a single set.
 
 depth (d)
 |
-v   1   2   3   4   5 ...     <-- sets (g)
+v   1   2   3   4   5 ...     <-- number of sets (sets)
 0   1   0   0   0   0 ...  1
 1   1   1   0   0   0 ...  2
 2   1   3   1   0   0 ...  5
 3   1   7   6   1   0 ... 15
 4   1  15  25  10   1 ... 52
-.
-.
+.           ^
+.            \___ number of partitions 'depth' below the top partition that have 'sets' sets.
 
-Table "2"
+Table "top_sets = 2" - starting with a partition with two sets.
 
 depth
 |
-v   1   2   3   4   5 ...
+v   1   2   3   4   5 ...     <-- number of sets (sets)
 0   0   1   0   0   0 ...  1
 1   0   2   1   0   0 ...  3
 2   0   4   5   1   0 ... 10
@@ -36,6 +41,18 @@ v   1   2   3   4   5 ...
 .
 .
 
+Table "top_sets = 3" - starting with a partition with three sets.
+
+depth
+|
+v   1   2   3   4   5 ...     <-- number of sets (sets)
+0   0   0   1   0   0 ...  1
+1   0   0   3   1   0 ...  4
+2   0   0   9   7   1 ... 17
+3   0   0  27  37  12 ... 76
+4   0   0  81 175  97 ...
+.
+.
 #endif
 
 // Cache of the number of partitions existing of 'sets' sets when starting with 'top_sets'
@@ -45,7 +62,7 @@ std::array<std::array<PartitionTask::partition_count_t, max_number_of_elements *
 
 // Returns a reference into the cache for a given top_sets, depth and sets.
 //static
-PartitionTask::partition_count_t& PartitionTask::number_of_partitions(int top_sets, int depth, int sets)
+PartitionTask::partition_count_t& PartitionTask::number_of_partitions_with_sets(int top_sets, int depth, int sets)
 {
   // The cache is compressed: we don't store the zeroes.
   // That is, the inner array stores the triangle of non-zero values for a given 'Table' (for a given top_sets)
@@ -59,7 +76,7 @@ int PartitionTask::table(int top_sets, int depth, int sets)
   assert(top_sets + depth <= max_number_of_elements);
   if (sets > depth + top_sets || sets < top_sets)
     return 0;
-  partition_count_t& te = number_of_partitions(top_sets, depth, sets);
+  partition_count_t& te = number_of_partitions_with_sets(top_sets, depth, sets);
   if (te == 0)
   {
     if (depth == 0)
@@ -73,10 +90,10 @@ int PartitionTask::table(int top_sets, int depth, int sets)
 }
 
 //static
-PartitionTask::partition_count_t PartitionTask::number_of_partitions(int top_sets, int depth)
+PartitionTask::partition_count_t PartitionTask::number_of_partitions(int top_sets, int depth, int max_number_of_sets)
 {
   partition_count_t sum = 0;
-  for (int8_t sets = top_sets; sets <= max_number_of_elements; ++sets)
+  for (int8_t sets = top_sets; sets <= max_number_of_sets; ++sets)
   {
     partition_count_t term = table(top_sets, depth, sets);
     if (term == 0)
@@ -88,23 +105,23 @@ PartitionTask::partition_count_t PartitionTask::number_of_partitions(int top_set
 
 // Print the table 'top_sets'.
 //static
-void PartitionTask::print_table(int top_sets)
+void PartitionTask::print_table(int top_sets, int max_number_of_sets)
 {
   std::cout << "  ";
-  for (int8_t sets = 1; sets <= max_number_of_elements; ++sets)
+  for (int8_t sets = 1; sets <= max_number_of_sets; ++sets)
   {
     std::cout << std::setw(8) << sets;
   }
   std::cout << '\n';
-  for (int8_t depth = 0; depth <= max_number_of_elements - top_sets; ++depth)
+  for (int8_t depth = 0; depth <= 4 /*max_number_of_elements - top_sets*/; ++depth)
   {
     std::cout << std::setw(2) << depth;
-    for (int8_t sets = 1; sets <= max_number_of_elements; ++sets)
+    for (int8_t sets = 1; sets <= max_number_of_sets; ++sets)
     {
       int v = table(top_sets, depth, sets);
       std::cout << std::setw(8) << v;
     }
-    std::cout << " = " << number_of_partitions(top_sets, depth) << '\n';
+    std::cout << " = " << number_of_partitions(top_sets, depth, max_number_of_sets) << '\n';
   }
   std::cout << '\n';
 }
@@ -152,8 +169,8 @@ Partition PartitionTask::random()
   {
     Element const new_element('A' + top_elements);
     int8_t depth = m_number_of_elements - top_elements;
-    partition_count_t existing_set = PartitionTask::number_of_partitions(top_sets, depth - 1);
-    partition_count_t new_set = PartitionTask::number_of_partitions(top_sets + 1, depth - 1);
+    partition_count_t existing_set = PartitionTask::number_of_partitions(top_sets, depth - 1, m_max_number_of_sets);
+    partition_count_t new_set = PartitionTask::number_of_partitions(top_sets + 1, depth - 1, m_max_number_of_sets);
     partition_count_t total = top_sets * existing_set + new_set;
 
 #if 0
