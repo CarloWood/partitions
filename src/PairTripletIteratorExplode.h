@@ -19,7 +19,7 @@
 // {ACF}
 // {BCF}
 
-class PairTripletIteratorScatter
+class PairTripletIteratorExplode
 {
  private:
   Set m_orig;
@@ -29,11 +29,11 @@ class PairTripletIteratorScatter
 
  public:
   // Create the begin iterator.
-  PairTripletIteratorScatter(PartitionTask const& partition_task, Set orig);
+  PairTripletIteratorExplode(PartitionTask const& partition_task, Set orig);
 
   static void initialize();
 
-  PairTripletIteratorScatter& operator++();
+  PairTripletIteratorExplode& operator++();
 
   void reset()
   {

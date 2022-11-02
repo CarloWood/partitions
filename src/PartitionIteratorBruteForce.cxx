@@ -1,7 +1,9 @@
 #include "sys.h"
 #include "PartitionIteratorBruteForce.h"
+#include "PartitionTask.h"
 
-PartitionIteratorBruteForce::PartitionIteratorBruteForce(int8_t number_of_elements) : m_multiloop(number_of_elements), m_loop_value_count(number_of_elements)
+PartitionIteratorBruteForce::PartitionIteratorBruteForce(PartitionTask const& partition_task) :
+  m_multiloop(partition_task.number_of_elements()), m_loop_value_count(partition_task.max_number_of_sets()), m_number_of_elements(partition_task.number_of_elements())
 {
   for (; !m_multiloop.finished(); m_multiloop.next_loop())
   {
@@ -9,6 +11,9 @@ PartitionIteratorBruteForce::PartitionIteratorBruteForce(int8_t number_of_elemen
     {
       // A loop ends when moving the element to the next set would leave its current set empty.
       if (m_multiloop() > 0 && --m_loop_value_count[m_multiloop() - 1] == 0)
+        break;
+      // We also can't go beyond the maximum number of allowed sets.
+      if (m_multiloop() == m_loop_value_count.size())
         break;
       ++m_loop_value_count[m_multiloop()];
 
@@ -31,6 +36,8 @@ PartitionIteratorBruteForce& PartitionIteratorBruteForce::operator++()
     {
       if (m_multiloop() > 0 && --m_loop_value_count[m_multiloop() - 1] == 0)
         break;
+      if (m_multiloop() == m_loop_value_count.size())
+        break;
       ++m_loop_value_count[m_multiloop()];
       if (m_multiloop.inner_loop())             // Most inner loop.
         return *this;
@@ -47,7 +54,7 @@ Partition PartitionIteratorBruteForce::operator*() const
   utils::Array<Set, max_number_of_elements, SetIndex> sets;
   for (SetIndex g = sets.ibegin(); g != sets.iend(); ++g)
     sets[g].clear();
-  ElementIndex const number_of_elements{ElementIndexPOD{static_cast<int8_t>(m_loop_value_count.size())}};
+  ElementIndex const number_of_elements{ElementIndexPOD{m_number_of_elements}};
   for (ElementIndex l{utils::bitset::index_begin}; l < number_of_elements; ++l)
     sets[SetIndex{m_multiloop[l()]}].add(Element{l});
   return {number_of_elements, sets};

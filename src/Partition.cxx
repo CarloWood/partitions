@@ -3,7 +3,7 @@
 #include "PartitionIteratorSingleElement.h"
 #include "PartitionIteratorWholeSet.h"
 #include "PartitionIteratorBruteForce.h"
-#include "PartitionIteratorScatter.h"
+#include "PartitionIteratorExplode.h"
 #include "PartitionTask.h"
 #include <cassert>
 #include <iostream>
@@ -126,12 +126,12 @@ std::ostream& operator<<(std::ostream& os, Partition const& partition)
   return os;
 }
 
-PartitionIteratorScatter Partition::sbegin(PartitionTask const& partition_task)
+PartitionIteratorExplode Partition::sbegin(PartitionTask const& partition_task)
 {
   return {partition_task, *this};
 }
 
-PartitionIteratorScatter Partition::send()
+PartitionIteratorExplode Partition::send()
 {
   return {};
 }

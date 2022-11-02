@@ -61,9 +61,9 @@ class PartitionTask
     return ElementIndexPOD{m_number_of_elements};
   }
 
-  PartitionIteratorBruteForce bbegin()
+  PartitionIteratorBruteForce bbegin(PartitionTask const& partition_task)
   {
-    return {m_number_of_elements};
+    return {partition_task};
   }
 
   PartitionIteratorBruteForce bend()

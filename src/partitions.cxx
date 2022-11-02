@@ -1,9 +1,9 @@
 #include "sys.h"
 #include "ElementPair.h"
 #include "Partition.h"
-#include "PartitionIteratorScatter.h"
+#include "PartitionIteratorExplode.h"
 #include "PartitionTask.h"
-#include "PairTripletIteratorScatter.h"
+#include "PairTripletIteratorExplode.h"
 #include "utils/MultiLoop.h"
 #include "utils/debug_ostream_operators.h"
 #include "utils/RandomNumber.h"
@@ -18,7 +18,7 @@
 #include <cmath>
 #include "debug.h"
 
-constexpr int8_t number_of_elements = 26;
+constexpr int8_t number_of_elements = 8;
 constexpr int8_t max_number_of_sets = 4;
 
 std::array<Score, 8> g_possible_scores = {
@@ -115,6 +115,9 @@ int main()
 
   partition_task.initialize_set23_to_score();
 
+  for (PartitionIteratorBruteForce bi = partition_task.bbegin(partition_task); !bi.is_end(); ++bi)
+    Dout(dc::notice, *bi);
+
   Score max_score(negative_inf);
   std::map<Partition, int> results;
   for (int rp = 0; rp < 100; ++rp)
@@ -131,11 +134,11 @@ int main()
     Score score = partition.find_local_maximum(partition_task);
 //    Dout(dc::notice, "Local maximum: " << partition << " = " << score);
     int count = 0;
-    for (PartitionIteratorScatter scatter = partition.sbegin(partition_task); !scatter.is_end(); ++scatter)
+    for (PartitionIteratorExplode scatter = partition.sbegin(partition_task); !scatter.is_end(); ++scatter)
     {
 //      Dout(dc::notice, "scatter = " << scatter);
       Partition partition2 = *scatter;
-//      Dout(dc::notice, "Scatter partition2 = " << partition2);
+//      Dout(dc::notice, "Explode partition2 = " << partition2);
       Score score2 = partition2.find_local_maximum(partition_task);
 //      Dout(dc::notice, "Local maximum partition2 = " << partition2 << " = " << score2);
       if (score2 > score)
@@ -144,7 +147,7 @@ int main()
         partition = partition2;
         score = score2;
       }
-      if (++count == PartitionIteratorScatter::total_loop_count_limit)
+      if (++count == PartitionIteratorExplode::total_loop_count_limit)
         break;
     }
     auto res = results.try_emplace(partition, 0);

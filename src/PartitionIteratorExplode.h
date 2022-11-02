@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Partition.h"
-#include "PairTripletIteratorScatter.h"
+#include "PairTripletIteratorExplode.h"
 #include "utils/MultiLoop.h"
 #include <vector>
 
@@ -42,7 +42,7 @@
 
 struct SetIteratorCompare;
 
-class PartitionIteratorScatter
+class PartitionIteratorExplode
 {
  public:
   static constexpr int total_loop_count_limit = 100;
@@ -51,7 +51,7 @@ class PartitionIteratorScatter
   friend struct SetIteratorCompare;
   struct SetIterator
   {
-    PairTripletIteratorScatter m_pair_triplet_iterator;
+    PairTripletIteratorExplode m_pair_triplet_iterator;
     SetIndex m_set_index;
     int m_loop_count;
 
@@ -75,11 +75,11 @@ class PartitionIteratorScatter
 
  public:
   // Create an end iterator.
-  PartitionIteratorScatter() = default;
+  PartitionIteratorExplode() = default;
   // Create the begin iterator.
-  PartitionIteratorScatter(PartitionTask const& partition_task, Partition orig);
+  PartitionIteratorExplode(PartitionTask const& partition_task, Partition orig);
 
-  PartitionIteratorScatter& operator++();
+  PartitionIteratorExplode& operator++();
 
   bool is_end() const
   {

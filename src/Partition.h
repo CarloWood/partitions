@@ -10,7 +10,7 @@
 
 class PartitionIterator;
 class PartitionIteratorBruteForce;
-class PartitionIteratorScatter;
+class PartitionIteratorExplode;
 class PartitionTask;
 
 class Partition
@@ -51,8 +51,8 @@ class Partition
 
   PartitionIterator end() const;
 
-  PartitionIteratorScatter sbegin(PartitionTask const& partition_task);
-  PartitionIteratorScatter send();
+  PartitionIteratorExplode sbegin(PartitionTask const& partition_task);
+  PartitionIteratorExplode send();
 
   SetIndex number_of_sets() const;
   bool is_alone(Element element) const;

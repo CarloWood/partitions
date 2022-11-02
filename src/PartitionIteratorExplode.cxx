@@ -1,22 +1,22 @@
 #include "sys.h"
-#include "PartitionIteratorScatter.h"
+#include "PartitionIteratorExplode.h"
 #include "utils/VectorCompare.h"
 
 struct SetIteratorCompare
 {
-  bool operator()(PartitionIteratorScatter::SetIterator const& lhs, PartitionIteratorScatter::SetIterator const& rhs) const
+  bool operator()(PartitionIteratorExplode::SetIterator const& lhs, PartitionIteratorExplode::SetIterator const& rhs) const
   {
     return lhs.m_pair_triplet_iterator.score_difference() < rhs.m_pair_triplet_iterator.score_difference();
   }
 };
 
-PartitionIteratorScatter::PartitionIteratorScatter(PartitionTask const& partition_task, Partition orig) : m_orig(orig)
+PartitionIteratorExplode::PartitionIteratorExplode(PartitionTask const& partition_task, Partition orig) : m_orig(orig)
 {
-//  DoutEntering(dc::notice, "PartitionIteratorScatter::PartitionIteratorScatter(" << orig << ")");
+//  DoutEntering(dc::notice, "PartitionIteratorExplode::PartitionIteratorExplode(" << orig << ")");
   for (SetIndex set_index = m_orig.set_ibegin(); set_index != m_orig.set_iend(); ++set_index)
   {
     Set set = m_orig.set(set_index);
-    int element_count = pair_triplet.element_count();
+    int element_count = set.element_count();
     if (element_count == 0)
       break;
     if (element_count > 2)
@@ -41,7 +41,7 @@ PartitionIteratorScatter::PartitionIteratorScatter(PartitionTask const& partitio
   }
 }
 
-PartitionIteratorScatter& PartitionIteratorScatter::operator++()
+PartitionIteratorExplode& PartitionIteratorExplode::operator++()
 {
   // for (int l0 = 0; l0 < m_pair_triplet_iterators[0].m_loop_count; ++l0)
   // {
@@ -82,7 +82,7 @@ PartitionIteratorScatter& PartitionIteratorScatter::operator++()
   return *this;
 }
 
-bool PartitionIteratorScatter::increase_loop_count()
+bool PartitionIteratorExplode::increase_loop_count()
 {
   //    |       |       |
   //    v       v       v
@@ -97,7 +97,7 @@ bool PartitionIteratorScatter::increase_loop_count()
   //  89, 65, 55
   //  89, 40, 55
 
-  PairTripletIteratorScatter const& pair_triplet_iterator = ++(m_pair_triplet_iterators.begin()->m_pair_triplet_iterator);
+  PairTripletIteratorExplode const& pair_triplet_iterator = ++(m_pair_triplet_iterators.begin()->m_pair_triplet_iterator);
   if (pair_triplet_iterator.is_end())
     return false;       // Reached the end.
 
@@ -118,13 +118,13 @@ bool PartitionIteratorScatter::increase_loop_count()
   return true;
 }
 
-Partition PartitionIteratorScatter::operator*() const
+Partition PartitionIteratorExplode::operator*() const
 {
   Partition result = m_orig;
   SetIndex first_empty_set = result.first_empty_set();
   for (auto& set_iterator : m_pair_triplet_iterators)
   {
-    PairTripletIteratorScatter const& pair_triplet_iterator = set_iterator.m_pair_triplet_iterator;
+    PairTripletIteratorExplode const& pair_triplet_iterator = set_iterator.m_pair_triplet_iterator;
     Set pair_triplet = *pair_triplet_iterator;
     SetIndex set_index = set_iterator.m_set_index;
     result.remove_from(set_index, pair_triplet);
@@ -134,7 +134,7 @@ Partition PartitionIteratorScatter::operator*() const
   return result;
 }
 
-void PartitionIteratorScatter::SetIterator::print_on(std::ostream& os) const
+void PartitionIteratorExplode::SetIterator::print_on(std::ostream& os) const
 {
   os << '{';
   os << "m_pair_triplet_iterator:" << m_pair_triplet_iterator <<
@@ -143,7 +143,7 @@ void PartitionIteratorScatter::SetIterator::print_on(std::ostream& os) const
   os << '}';
 }
 
-void PartitionIteratorScatter::print_on(std::ostream& os) const
+void PartitionIteratorExplode::print_on(std::ostream& os) const
 {
   os << '{';
   os << "m_orig:" << m_orig <<
