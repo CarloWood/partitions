@@ -24,13 +24,17 @@ class Partition
   Partition() = default;
   Partition(PartitionTask const& partition_task);
   Partition(PartitionTask const& partition_task, Set set);
+  Partition(Partition const& orig, int8_t max_number_of_sets) : m_sets(orig.m_sets), m_number_of_elements(orig.m_number_of_elements)
+  {
+    // We only support growing the number of allowed sets.
+    ASSERT(max_number_of_sets >= orig.m_sets.size());
+    m_sets.resize(max_number_of_sets);
+    for (SetIndex set_index = orig.m_sets.iend(); set_index < m_sets.iend(); ++set_index)
+      m_sets[set_index].clear();
+  }
 
   // Only used by PartitionIteratorBruteForce.
-  Partition(ElementIndex number_of_elements, utils::Array<Set, max_number_of_elements, SetIndex> const& sets) :
-    m_sets(sets.begin(), sets.begin() + number_of_elements()), m_number_of_elements(number_of_elements())
-  {
-    sort();
-  }
+  Partition(PartitionTask const& partition_task, utils::Array<Set, max_number_of_elements, SetIndex> const& sets);
 
   void print_sets() const;
   void print_on(std::ostream& os) const;
@@ -67,6 +71,7 @@ class Partition
 
   void add_to(SetIndex set_index, Set set)
   {
+    ASSERT(set_index < m_sets.iend());
     m_sets[set_index].add(set);
   }
 
@@ -76,6 +81,7 @@ class Partition
   }
 
   Score find_local_maximum(PartitionTask const& partition_task);
+  void reduce_sets(PartitionTask const& partition_task);
 
   friend bool operator<(Partition const& lhs, Partition const& rhs)
   {

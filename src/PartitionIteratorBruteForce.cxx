@@ -3,7 +3,7 @@
 #include "PartitionTask.h"
 
 PartitionIteratorBruteForce::PartitionIteratorBruteForce(PartitionTask const& partition_task) :
-  m_multiloop(partition_task.number_of_elements()), m_loop_value_count(partition_task.max_number_of_sets()), m_number_of_elements(partition_task.number_of_elements())
+  m_multiloop(partition_task.number_of_elements()), m_loop_value_count(partition_task.max_number_of_sets()), m_partition_task(&partition_task)
 {
   for (; !m_multiloop.finished(); m_multiloop.next_loop())
   {
@@ -54,8 +54,8 @@ Partition PartitionIteratorBruteForce::operator*() const
   utils::Array<Set, max_number_of_elements, SetIndex> sets;
   for (SetIndex g = sets.ibegin(); g != sets.iend(); ++g)
     sets[g].clear();
-  ElementIndex const number_of_elements{ElementIndexPOD{m_number_of_elements}};
+  ElementIndex const number_of_elements{ElementIndexPOD{m_partition_task->number_of_elements()}};
   for (ElementIndex l{utils::bitset::index_begin}; l < number_of_elements; ++l)
     sets[SetIndex{m_multiloop[l()]}].add(Element{l});
-  return {number_of_elements, sets};
+  return {*m_partition_task, sets};
 }

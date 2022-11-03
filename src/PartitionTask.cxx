@@ -3,7 +3,7 @@
 #include "ElementPair.h"
 #include <iomanip>
 
-#if 0
+/*
                                              {A}
                {AB}                                                            {A,B}
     {ABC}                {AB,C}          |          {AC,B}                     {A,BC}                          {A,B,C}
@@ -53,7 +53,7 @@ v   1   2   3   4   5 ...     <-- number of sets (sets)
 4   0   0  81 175  97 ...
 .
 .
-#endif
+*/
 
 // Cache of the number of partitions existing of 'sets' sets when starting with 'top_sets'
 // and adding 'depth' new elements.
@@ -173,19 +173,8 @@ Partition PartitionTask::random()
     partition_count_t new_set = PartitionTask::number_of_partitions(top_sets + 1, depth - 1, m_max_number_of_sets);
     partition_count_t total = top_sets * existing_set + new_set;
 
-#if 0
-    std::cout << "top = " << top << '\n';
-    std::cout << "top_sets = " << top_sets << '\n';
-    std::cout << "top_elements = " << top_elements << '\n';
-    std::cout << "depth = " << depth << '\n';
-    std::cout << "existing_set = " << existing_set << '\n';
-    std::cout << "new_set = " << new_set << '\n';
-    std::cout << "total = " << total << '\n';
-#endif
-
     std::uniform_int_distribution<partition_count_t> distr{0, total - 1};
     partition_count_t n = m_random_number.generate(distr);
-//    std::cout << "random number = " << n << '\n';
     if (n >= top_sets * existing_set)
     {
       // Add new element to new set.

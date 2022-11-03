@@ -118,9 +118,9 @@ bool PartitionIteratorExplode::increase_loop_count()
   return true;
 }
 
-Partition PartitionIteratorExplode::operator*() const
+Partition PartitionIteratorExplode::get_partition(PartitionTask const& partition_task) const
 {
-  Partition result = m_orig;
+  Partition result(m_orig, m_orig.element_iend()());
   SetIndex first_empty_set = result.first_empty_set();
   for (auto& set_iterator : m_pair_triplet_iterators)
   {
@@ -131,6 +131,7 @@ Partition PartitionIteratorExplode::operator*() const
     result.add_to(first_empty_set++, pair_triplet);
   }
   result.sort();
+  result.reduce_sets(partition_task);
   return result;
 }
 

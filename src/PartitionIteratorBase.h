@@ -2,6 +2,7 @@
 #define PARTITION_ITERATOR_BASE
 
 #include "Partition.h"
+#include "utils/Badge.h"
 
 class PartitionIteratorBase
 {
@@ -45,7 +46,7 @@ class PartitionIteratorBase
     return m_to_set;
   }
 
-  void kick_start()
+  void kick_start(utils::Badge<PartitionIterator>)
   {
     if (m_from_set == m_to_set)
       increment();
@@ -61,11 +62,11 @@ class PartitionIteratorBase
     return m_from_set.undefined();
   }
 
- virtual void increment() = 0;
- virtual Set moved_elements() const = 0;
- virtual bool unequal(PartitionIteratorBase const& rhs) const = 0;
+  virtual void increment() = 0;
+  virtual Set moved_elements() const = 0;
+  virtual bool unequal(PartitionIteratorBase const& rhs) const = 0;
 
- void print_on(std::ostream&) const;
+  void print_on(std::ostream&) const;
 };
 
 #endif // PARTITION_ITERATOR_BASE

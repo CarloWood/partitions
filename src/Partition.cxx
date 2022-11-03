@@ -33,6 +33,12 @@ Partition::Partition(PartitionTask const& partition_task, Set set) :
     set_iter->clear();
 }
 
+Partition::Partition(PartitionTask const& partition_task, utils::Array<Set, max_number_of_elements, SetIndex> const& sets) :
+  m_sets(sets.begin(), sets.begin() + partition_task.max_number_of_sets()), m_number_of_elements(partition_task.number_of_elements())
+{
+  sort();
+}
+
 PartitionIterator Partition::end() const
 {
   return {};
@@ -184,4 +190,31 @@ Score Partition::find_local_maximum(PartitionTask const& partition_task)
   }
   while (no_improvement_count < number_of_algorithms);
   return current_score;
+}
+
+void Partition::reduce_sets(PartitionTask const& partition_task)
+{
+//  DoutEntering(dc::notice, "Partition::reduce_sets(" << partition_task << ") [" << *this << "]");
+  find_local_maximum(partition_task);
+  // <{A}, {B}, {C}, {}, {}>
+  //                 ^
+  //                 |
+  //              fes=3
+  int8_t fes = first_empty_set().get_value();
+  for (int i = 0; i < fes - partition_task.max_number_of_sets(); ++i)
+  {
+    Score max_score{negative_inf};
+    for (PartitionIterator iter = begin<PartitionIteratorWholeSet>(); iter != end(); ++iter)
+    {
+      Partition merged_partition = *iter;    // Has one set less.
+      Score merged_score = merged_partition.score(partition_task);
+      if (merged_score > max_score)
+      {
+        max_score = merged_score;
+        *this = merged_partition;
+      }
+    }
+  }
+  ASSERT(first_empty_set().get_value() <= partition_task.max_number_of_sets());
+  m_sets.resize(partition_task.max_number_of_sets());
 }

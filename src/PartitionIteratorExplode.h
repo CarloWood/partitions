@@ -86,7 +86,7 @@ class PartitionIteratorExplode
     return m_pair_triplet_counters.finished();
   }
 
-  Partition operator*() const;
+  Partition get_partition(PartitionTask const& partition_task) const;
 
   void print_on(std::ostream& os) const;
 };

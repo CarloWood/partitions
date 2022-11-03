@@ -5,7 +5,7 @@
 PartitionIterator::PartitionIterator(Partition const& orig, std::unique_ptr<PartitionIteratorBase>&& base) :
   m_base(std::move(base))
 {
-  m_base->kick_start();
+  m_base->kick_start({});
 }
 
 PartitionIterator::PartitionIterator()

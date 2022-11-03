@@ -4,12 +4,14 @@
 #include "utils/MultiLoop.h"
 #include <array>
 
+class PartitionTask;
+
 class PartitionIteratorBruteForce
 {
  private:
   MultiLoop m_multiloop;
   std::vector<int> m_loop_value_count;       // The number of loop counter with a value equal to the index.
-  int8_t m_number_of_elements;
+  PartitionTask const* m_partition_task{};
 
  public:
   // Create an end iterator.
