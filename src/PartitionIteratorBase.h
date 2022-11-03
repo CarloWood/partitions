@@ -28,6 +28,8 @@ class PartitionIteratorBase
     ASSERT(!m_from_set.undefined());
   }
 
+  virtual ~PartitionIteratorBase() { }
+
   Partition const& original_partition() const
   {
     return m_original_partition;
