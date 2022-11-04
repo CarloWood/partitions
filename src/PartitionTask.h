@@ -14,7 +14,7 @@ class PartitionTask
 
   int8_t m_number_of_elements;                  // The number of elements that we need to partition.
   int8_t m_max_number_of_sets;                  // The maximum number of sets that will be used by this task.
-  utils::RandomNumber m_random_number{0x5ec7ec5e39c65};
+  utils::RandomNumber m_random_number; //{0x5ec7ec5e39c65};
   std::map<Set, Score> m_set23_to_score;        // Initialized by initialize_set23_to_score.
   bool m_set23_to_score_initialized{false};     // Set to true when m_set23_to_score is initialized.
   std::vector<Score> m_scores;

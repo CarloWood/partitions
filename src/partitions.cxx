@@ -18,8 +18,8 @@
 #include <cmath>
 #include "debug.h"
 
-constexpr int8_t number_of_elements = 26;
-constexpr int8_t max_number_of_sets = 5;
+constexpr int8_t number_of_elements = 32;
+constexpr int8_t max_number_of_sets = 10;
 
 std::array<Score, 8> g_possible_scores = {
   negative_inf,
@@ -37,9 +37,9 @@ std::array<int, 8> frequency = {
   number_of_elements,
   number_of_elements,
   number_of_elements,
-  10,
-  10,
-  10,
+  number_of_elements,
+  number_of_elements,
+  number_of_elements,
   1
 };
 
@@ -122,7 +122,9 @@ int main()
 
   Score max_score(negative_inf);
   std::map<Partition, int> results;
-  for (int rp = 0; rp < 100; ++rp)
+  int best_rp = 0;
+  int best_count = 0;
+  for (int rp = 0; rp < 1000; ++rp)
   {
     Partition partition = partition_task.random();
     Score score = partition.find_local_maximum(partition_task);
@@ -142,7 +144,19 @@ int main()
     auto res = results.try_emplace(partition, 0);
     res.first->second += 1;
     if (score > max_score)
+    {
       max_score = score;
+      best_rp = rp;
+      best_count = 1;
+    }
+    else if (score.unchanged(max_score))
+      ++best_count;
+    // x^y = e^(ln(x)*y)
+    if (rp > std::max(20, 2 * best_rp) && std::exp(rp * std::log(static_cast<double>(rp - best_count) / rp)) < 0.01)
+    {
+      Dout(dc::notice, "rp = " << rp);
+      break;
+    }
   }
   std::multimap<Score, std::map<Partition, int>::iterator> score_to_partition;
   for (auto ri = results.begin(); ri != results.end(); ++ri)

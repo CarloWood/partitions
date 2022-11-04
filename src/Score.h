@@ -95,5 +95,11 @@ class Score
     return rhs < lhs;
   }
 
+  bool unchanged(Score const& rhs)
+  {
+    return m_number_of_positive_inf == rhs.m_number_of_positive_inf && m_number_of_negative_inf == rhs.m_number_of_negative_inf &&
+      m_value == rhs.m_value;   // Assuming rhs is a literal copy of lhs, this will just return true.
+  }
+
   void print_on(std::ostream& os) const;
 };
