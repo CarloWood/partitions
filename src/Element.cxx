@@ -2,12 +2,6 @@
 #include "Element.h"
 #include <iostream>
 
-std::ostream& operator<<(std::ostream& os, ElementIndex index)
-{
-  os << '#' << (int)index();
-  return os;
-}
-
 void Element::print_on(std::ostream& os) const
 {
   os << m_name;

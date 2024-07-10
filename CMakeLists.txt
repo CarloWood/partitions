@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.14...3.24)
+cmake_minimum_required(VERSION 3.14...3.30)
 
 project(partitions
         LANGUAGES CXX

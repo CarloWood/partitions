@@ -13,8 +13,6 @@ class Element;
 using ElementIndex = elements_t::Index;
 using ElementIndexPOD = utils::bitset::IndexPOD;
 
-std::ostream& operator<<(std::ostream& os, ElementIndex index);
-
 class Element
 {
  private:
@@ -54,5 +52,4 @@ class Element
 
  public:
   void print_on(std::ostream& os) const;
-  friend std::ostream& operator<<(std::ostream& os, Element const& element);
 };
