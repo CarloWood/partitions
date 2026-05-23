@@ -1,6 +1,7 @@
 #include "sys.h"
 #include "PartitionIteratorExplode.h"
 #include "utils/VectorCompare.h"
+#include "utils/print_range.h"
 
 struct SetIteratorCompare
 {
@@ -148,6 +149,6 @@ void PartitionIteratorExplode::print_on(std::ostream& os) const
 {
   os << '{';
   os << "m_orig:" << m_orig <<
-      ", m_pair_triplet_iterators:" << m_pair_triplet_iterators;
+      ", m_pair_triplet_iterators:" << utils::print_range(m_pair_triplet_iterators.begin(), m_pair_triplet_iterators.end());
   os << '}';
 }

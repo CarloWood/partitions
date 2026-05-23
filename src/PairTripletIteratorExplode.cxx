@@ -2,6 +2,10 @@
 #include "PairTripletIteratorExplode.h"
 #include "PartitionTask.h"
 #include "ElementPair.h"
+#include "debug.h"
+#ifdef LIBCWD_USING_OSTREAM_PRELUDE
+#include "cwds/debug_ostream_operators.h"
+#endif
 
 PairTripletIteratorExplode::PairTripletIteratorExplode(PartitionTask const& partition_task, Set orig) : m_orig(orig), m_method_A(std::make_shared<method_A_container_t>())
 {
@@ -60,9 +64,12 @@ Score PairTripletIteratorExplode::score_difference() const
 void PairTripletIteratorExplode::print_on(std::ostream& os) const
 {
   os << '{';
+#ifdef LIBCWD_USING_OSTREAM_PRELUDE
+  LIBCWD_USING_OSTREAM_PRELUDE
   os << "  m_orig: " << m_orig << '\n';
   for (method_A_container_t::const_iterator iter = m_method_A->begin(); iter != m_method_A->end(); ++iter)
     os << "  " << *iter << '\n';
   os << "  m_current_A = " << *m_current_A << '\n';
+#endif
   os << '}';
 }

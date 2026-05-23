@@ -2,6 +2,10 @@
 #include "PartitionTask.h"
 #include "ElementPair.h"
 #include <iomanip>
+#include "debug.h"
+#ifdef LIBCWD_USING_OSTREAM_PRELUDE
+#include "cwds/debug_ostream_operators.h"
+#endif
 
 /*
                                              {A}
@@ -194,9 +198,12 @@ Partition PartitionTask::random()
 void PartitionTask::print_on(std::ostream& os) const
 {
   os << '{';
+#ifdef LIBCWD_USING_OSTREAM_PRELUDE
+  LIBCWD_USING_OSTREAM_PRELUDE
   os << "m_number_of_elements:" << m_number_of_elements <<
       ", m_set23_to_score:" << m_set23_to_score <<
       ", m_set23_to_score_initialized:" << std::boolalpha << m_set23_to_score_initialized <<
       ", m_scores:" << m_scores;
+#endif
   os << '}';
 }
